@@ -13,7 +13,8 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch('/api');
+        const apiBase = import.meta.env['VITE_API_BASE_URL'] + '/api';
+        const response = await fetch(apiBase);
         if (!response.ok) throw new Error('Failed to fetch');
         const result = await response.json();
         setData(result);
