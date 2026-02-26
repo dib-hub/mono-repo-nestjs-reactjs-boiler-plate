@@ -1,0 +1,24 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "@my-monorepo/database": ["libs/repository/src/index.ts"],
+      "@my-monorepo/types": ["libs/types/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

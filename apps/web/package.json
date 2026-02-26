@@ -1,0 +1,12 @@
+{
+  "name": "@my-monorepo/web",
+  "version": "1.0.0",
+  "description": "React + Tailwind CSS frontend application",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

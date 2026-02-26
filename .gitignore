@@ -1,0 +1,43 @@
+# Generated files and directories
+dist/
+build/
+out-tsc/
+.next/
+.angular/
+
+# Node
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+npm-pnpm-workspace.yaml
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Prisma
+prisma/migrations/
+.env.test.local
+dev.db
+dev.db-shm
+dev.db-wal
+
+# NX
+.nx/cache/
+.nx/workspace-data/
+
+# Temp
+tmp/
+temp/
+*.log

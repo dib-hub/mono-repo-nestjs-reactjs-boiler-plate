@@ -1,0 +1,6 @@
+{
+  "name": "@my-monorepo/api-e2e",
+  "version": "1.0.0",
+  "description": "API end-to-end tests",
+  "private": true
+}

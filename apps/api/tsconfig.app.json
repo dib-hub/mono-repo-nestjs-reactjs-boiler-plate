@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/apps/api",
+    "emitDecoratorMetadata": true,
+    "module": "CommonJS",
+    "target": "ES2020",
+    "baseUrl": "."
+  },
+  "files": ["src/main.ts"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
+}

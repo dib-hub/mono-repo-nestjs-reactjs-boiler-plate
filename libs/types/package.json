@@ -1,0 +1,13 @@
+{
+  "name": "@my-monorepo/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types, interfaces and DTOs",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./dist/index.js"
+    }
+  }
+}
