@@ -1,74 +1,97 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 
-interface ApiData {
-  message: string;
-  timestamp: string;
-}
-
-export default function HomePage() {
-  const [data, setData] = useState<ApiData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const apiBase = import.meta.env['VITE_API_BASE_URL'] + '/api';
-        const response = await fetch(apiBase);
-        if (!response.ok) throw new Error('Failed to fetch');
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
-
+const HomePage = () => {
   return (
-    <div className="space-y-8">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to the Monorepo!</h2>
-        <p className="text-gray-600">
-          This is a full-stack NX monorepo with NestJS backend, React + Tailwind frontend, and
-          Prisma database.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200">
+      {/* Hero Section */}
+      <section className="px-6 md:px-16 py-10 md:py-20">
+        <div className="grid md:grid-cols-2 gap-10 items-center">
+          {/* Left Side */}
+          <div>
+            <p className="text-gray-700 mb-3">Welcome to DibHub</p>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">API Status</h3>
-        {loading && <p className="text-blue-600">Loading...</p>}
-        {error && <p className="text-red-600">Error: {error}</p>}
-        {data && (
-          <div className="space-y-2">
-            <p className="text-gray-900">
-              <span className="font-semibold">Message:</span> {data.message}
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+              Empowering <br /> Your Ideas
+            </h2>
+
+            <p className="text-gray-700 mt-6 max-w-lg">
+              Join us and take your projects to the next level. Collaborate, share, and innovate
+              with ease.
             </p>
-            <p className="text-gray-900">
-              <span className="font-semibold">Time:</span>{' '}
-              {new Date(data.timestamp).toLocaleString()}
+
+            <button className="mt-8 bg-gray-900 text-white px-8 py-3 rounded-xl shadow-lg hover:bg-black transition">
+              Get Started
+            </button>
+          </div>
+
+          {/* Right Side Illustration */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md bg-white/20 backdrop-blur-md rounded-3xl p-10 shadow-xl">
+              <div className="grid grid-cols-3 gap-6">
+                {Array.from({ length: 9 }).map((_, index) => (
+                  <div key={index} className="w-14 h-14 bg-white/40 rounded-full" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="px-6 md:px-16 pb-20">
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Card 1 */}
+          <div className="bg-white/40 backdrop-blur-md p-8 rounded-3xl shadow-lg">
+            <div className="text-4xl mb-4">🚀</div>
+
+            <h3 className="text-xl font-semibold mb-2">Creative Collaboration</h3>
+
+            <p className="text-gray-700">
+              Work together in real-time and bring your ideas to life.
             </p>
           </div>
-        )}
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-blue-100 rounded-lg p-6">
-          <h4 className="font-semibold text-blue-900 mb-2">Backend</h4>
-          <p className="text-sm text-blue-700">NestJS + PostgreSQL</p>
+          {/* Card 2 */}
+          <div className="bg-white/40 backdrop-blur-md p-8 rounded-3xl shadow-lg">
+            <div className="text-4xl mb-4">📊</div>
+
+            <h3 className="text-xl font-semibold mb-2">Powerful Tools</h3>
+
+            <p className="text-gray-700">
+              Access a suite of powerful tools to manage your projects.
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white/40 backdrop-blur-md p-8 rounded-3xl shadow-lg">
+            <div className="text-4xl mb-4">🔒</div>
+
+            <h3 className="text-xl font-semibold mb-2">Secure Platform</h3>
+
+            <p className="text-gray-700">
+              Your data is securely stored and protected at all times.
+            </p>
+          </div>
         </div>
-        <div className="bg-green-100 rounded-lg p-6">
-          <h4 className="font-semibold text-green-900 mb-2">Frontend</h4>
-          <p className="text-sm text-green-700">React + Tailwind CSS</p>
+      </section>
+
+      {/* CTA Section */}
+      <section className="px-6 md:px-16 pb-20">
+        <div className="bg-white/40 backdrop-blur-md rounded-3xl p-10 text-center shadow-xl">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Start Building Today</h2>
+
+          <p className="text-gray-700 mb-6">Join DibHub and turn your ideas into reality.</p>
+
+          <button className="bg-black text-white px-8 py-3 rounded-xl">Create Account</button>
         </div>
-        <div className="bg-purple-100 rounded-lg p-6">
-          <h4 className="font-semibold text-purple-900 mb-2">Database</h4>
-          <p className="text-sm text-purple-700">Prisma ORM</p>
-        </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="text-center pb-8 text-gray-700">
+        © 2026 DibHub. All rights reserved.
+      </footer>
     </div>
   );
-}
+};
+
+export default HomePage;
