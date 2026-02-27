@@ -1,3 +1,6 @@
 {
-  "extends": "nx/presets/npm.json"
+  "extends": "nx/presets/npm.json",
+  "projects": {
+    "api": "apps/api"
+  }
 }

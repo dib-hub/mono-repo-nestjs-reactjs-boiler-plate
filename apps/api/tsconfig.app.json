@@ -3,9 +3,14 @@
   "compilerOptions": {
     "outDir": "../../dist/apps/api",
     "emitDecoratorMetadata": true,
-    "module": "CommonJS",
-    "target": "ES2020",
-    "baseUrl": "."
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "@my-monorepo/database": ["../../libs/repository/src/index.ts"],
+      "@my-monorepo/types": ["../../libs/types/src/index.ts"]
+    }
   },
   "files": ["src/main.ts"],
   "include": ["src/**/*.ts"],

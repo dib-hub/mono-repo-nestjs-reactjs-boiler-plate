@@ -1,0 +1,14 @@
+{
+  "name": "api",
+  "projectType": "application",
+  "root": "apps/api",
+  "sourceRoot": "apps/api/src",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm -C apps/api run dev"
+      }
+    }
+  }
+}

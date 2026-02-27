@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Prisma database client and services",
   "private": true,
+  "type": "module",
   "scripts": {
     "prisma:generate": "prisma generate"
   },

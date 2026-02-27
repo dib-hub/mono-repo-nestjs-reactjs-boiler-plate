@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
+  "ts-node": {
+    "project": "./tsconfig.app.json",
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
   "files": [],
   "include": [],
   "references": [
@@ -14,6 +19,7 @@
     "target": "ES2020",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "emitDecoratorMetadata": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
