@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { Link } from 'react-router-dom';
+
+const decorationIndices = Array.from({ length: 9 }, (_, i) => i);
 
 export const SignUp: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,12 +15,12 @@ export const SignUp: React.FC = () => {
     confirmPassword: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     console.log(formData);
   };
@@ -107,8 +110,11 @@ export const SignUp: React.FC = () => {
         <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-12 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="grid grid-cols-3 gap-4">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="w-20 h-20 rounded-full bg-white opacity-30 shadow-lg"></div>
+              {decorationIndices.map((index) => (
+                <div
+                  key={index}
+                  className="w-20 h-20 rounded-full bg-white opacity-30 shadow-lg"
+                ></div>
               ))}
             </div>
           </div>

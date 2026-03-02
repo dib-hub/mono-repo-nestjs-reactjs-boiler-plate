@@ -1,0 +1,16 @@
+{
+  "name": "web",
+  "projectType": "application",
+  "root": "apps/web",
+  "sourceRoot": "apps/web/src",
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [],
+      "options": {
+        "lintFilePatterns": ["apps/web/src/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": ["scope:web"]
+}

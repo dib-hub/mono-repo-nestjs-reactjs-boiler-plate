@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
+import { ReactNode, JSX } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: LayoutProps): JSX.Element {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow">

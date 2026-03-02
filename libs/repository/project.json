@@ -1,0 +1,16 @@
+{
+  "name": "repository",
+  "projectType": "library",
+  "root": "libs/repository",
+  "sourceRoot": "libs/repository/src",
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [],
+      "options": {
+        "lintFilePatterns": ["libs/repository/src/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": ["scope:shared"]
+}

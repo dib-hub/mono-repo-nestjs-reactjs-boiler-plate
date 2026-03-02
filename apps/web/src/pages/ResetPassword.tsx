@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import { FC, FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export const ResetPassword: React.FC = () => {
+import { Button } from '../components/Button';
+import { Input } from '../components/Input';
+
+const decorationIndices = Array.from({ length: 9 }, (_, i) => i);
+
+export const ResetPassword: FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent): void => {
     e.preventDefault();
     if (password === confirmPassword) {
       setSuccess(true);
@@ -78,8 +81,11 @@ export const ResetPassword: React.FC = () => {
         <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-12 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="grid grid-cols-3 gap-4">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="w-20 h-20 rounded-full bg-white opacity-30 shadow-lg"></div>
+              {decorationIndices.map((index) => (
+                <div
+                  key={index}
+                  className="w-20 h-20 rounded-full bg-white opacity-30 shadow-lg"
+                ></div>
               ))}
             </div>
           </div>

@@ -1,6 +1,6 @@
-import React from 'react';
+import { JSX } from 'react';
 
-const HomePage = () => {
+const HomePage = (): JSX.Element => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200">
       {/* Hero Section */}

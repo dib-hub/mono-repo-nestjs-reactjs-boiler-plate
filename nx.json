@@ -1,6 +1,19 @@
 {
   "extends": "nx/presets/npm.json",
   "projects": {
-    "api": "apps/api"
+    "api": "apps/api",
+    "web": "apps/web",
+    "repository": "libs/repository",
+    "types": "libs/types"
+  },
+  "targetDefaults": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["{projectRoot}/**/*.{ts,tsx,js,jsx}"],
+        "eslintConfig": "eslint.config.js"
+      }
+    }
   }
 }

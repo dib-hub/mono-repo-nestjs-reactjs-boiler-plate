@@ -5,11 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "rootDir": "./src",
-    "typeRoots": ["../../node_modules/@types"],
-    "paths": {
-      "@my-monorepo/database": ["./src/index.ts"]
-    }
+    "typeRoots": ["../../node_modules/@types"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

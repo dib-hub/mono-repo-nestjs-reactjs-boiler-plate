@@ -5,6 +5,7 @@
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",

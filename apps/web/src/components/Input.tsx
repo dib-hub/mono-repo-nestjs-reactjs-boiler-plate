@@ -1,16 +1,16 @@
-import React from 'react';
+import { ChangeEvent, FC } from 'react';
 
 interface InputProps {
   type?: string;
   placeholder?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   className?: string;
   name?: string;
   required?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input: FC<InputProps> = ({
   type = 'text',
   placeholder = '',
   value,
