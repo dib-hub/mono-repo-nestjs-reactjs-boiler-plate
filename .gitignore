@@ -8,7 +8,6 @@ out-tsc/
 # Node
 node_modules/
 package-lock.json
-pnpm-lock.yaml
 npm-pnpm-workspace.yaml
 
 # IDE
