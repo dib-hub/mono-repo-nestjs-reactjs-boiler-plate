@@ -1,20 +1,22 @@
-import { FC, FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useFormik } from 'formik';
 
-import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { Button } from '../components/Button';
 
-const decorationIndices = Array.from({ length: 9 }, (_, i) => i);
-
-export const SignIn: FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export const SignIn: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: FormEvent): void => {
-    e.preventDefault();
-    console.log({ email, password, rememberMe });
-  };
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    onSubmit: (values) => {
+      alert(JSON.stringify(values));
+    },
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
@@ -51,21 +53,23 @@ export const SignIn: FC = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={formik.handleSubmit} className="space-y-4">
             <div>
               <Input
                 type="email"
+                name="email"
                 placeholder="Email or username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formik.values.email}
+                onChange={formik.handleChange}
               />
             </div>
             <div>
               <Input
                 type="password"
+                name="password"
                 placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formik.values.password}
+                onChange={formik.handleChange}
               />
             </div>
 
@@ -109,12 +113,12 @@ export const SignIn: FC = () => {
         <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-12 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="grid grid-cols-3 gap-4">
-              {decorationIndices.map((index) => (
+              {/* {decorationIndices.map((index) => (
                 <div
                   key={index}
                   className="w-20 h-20 rounded-full bg-white opacity-30 shadow-lg"
                 ></div>
-              ))}
+              ))} */}
             </div>
           </div>
         </div>
