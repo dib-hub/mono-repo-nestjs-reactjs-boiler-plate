@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "description": "NestJS API application",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@my-monorepo/database": "workspace:*",
-    "@my-monorepo/types": "workspace:*"
-    ,
+    "@my-monorepo/types": "workspace:*",
     "dotenv": "^16.1.4"
   },
-  "type": "module",
   "scripts": {
-    "dev": "node -r reflect-metadata --loader ts-node/esm --experimental-specifier-resolution=node -r tsconfig-paths/register src/main.ts",
+    "dev": "node --import @swc-node/register/esm-register src/main.ts",
     "build": "tsc -p tsconfig.app.json"
   }
 }
