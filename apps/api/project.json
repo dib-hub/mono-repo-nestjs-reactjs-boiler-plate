@@ -15,6 +15,13 @@
       "options": {
         "lintFilePatterns": ["apps/api/src/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "apps/api/jest.config.ts",
+        "passWithNoTests": true
+      }
     }
   },
   "tags": ["scope:api"]

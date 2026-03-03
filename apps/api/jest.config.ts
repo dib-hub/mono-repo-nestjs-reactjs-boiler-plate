@@ -11,6 +11,26 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  moduleNameMapper: {
+    '^@my-monorepo/database$': '<rootDir>/../../libs/repository/src/index.ts',
+    '^@my-monorepo/types$': '<rootDir>/../../libs/types/src/index.ts',
+  },
   coverageDirectory: '../../coverage/apps/api',
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/main.ts',
+    '!src/app/app.module.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/*.test.ts',
+    '!src/**/*.d.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 75,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
   roots: ['<rootDir>/src'],
 };
