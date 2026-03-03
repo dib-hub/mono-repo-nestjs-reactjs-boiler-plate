@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFormik } from 'formik';
+import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Input } from '../components/Input';
@@ -33,8 +33,8 @@ export const SignUp: React.FC = () => {
     }
   }, [success, user, navigate]);
 
-  const validate = (values: SignUpForm) => {
-    const errors: any = {};
+  const validate = (values: SignUpForm): FormikErrors<SignUpForm> => {
+    const errors: FormikErrors<SignUpForm> = {};
 
     if (!values.firstName.trim()) {
       errors.firstName = 'First name is required';
@@ -88,8 +88,12 @@ export const SignUp: React.FC = () => {
 
       try {
         await dispatch(userSignUp(signupData)).unwrap();
-      } catch (err: any) {
-        setLocalError(err || 'Signup failed. Please try again.');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setLocalError(err.message);
+        } else {
+          setLocalError('Signup failed. Please try again.');
+        }
       }
     },
   });

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { UsersService } from '@my-monorepo/database';
-import { CreateUserDto, IUser } from '@my-monorepo/types';
+import { CreateUserDto, IUser, SignInDto } from '@my-monorepo/types';
 
 @Injectable()
 export class AuthService {
@@ -8,6 +8,10 @@ export class AuthService {
 
   async signup(createUserDto: CreateUserDto): Promise<IUser> {
     return this.usersService.create(createUserDto);
+  }
+
+  async signIn(signInDto: SignInDto): Promise<IUser> {
+    return this.usersService.signIn(signInDto);
   }
 
   async getUserById(id: string): Promise<IUser> {

@@ -8,6 +8,11 @@ export class CreateUserDto {
   confirmPassword?: string;
 }
 
+export class SignInDto {
+  email!: string;
+  password!: string;
+}
+
 export class UpdateUserDto {
   email?: string;
   firstName?: string;

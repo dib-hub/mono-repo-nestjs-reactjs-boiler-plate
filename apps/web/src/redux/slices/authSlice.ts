@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { userSignUp, getUserById } from '../../services/auth';
+import { userSignIn, userSignUp, getUserById } from '../../services/auth';
 
 interface User {
   id: string;
@@ -48,6 +48,25 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Handle userSignIn
+    builder
+      .addCase(userSignIn.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(userSignIn.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.success = true;
+        state.error = null;
+      })
+      .addCase(userSignIn.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.success = false;
+      });
+
     // Handle userSignUp
     builder
       .addCase(userSignUp.pending, (state) => {

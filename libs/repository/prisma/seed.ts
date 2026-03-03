@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from '../src/lib/generated/client/client';
@@ -7,15 +8,16 @@ const prisma = new PrismaClient({ adapter });
 
 async function main(): Promise<void> {
   console.log('🌱 Seeding database...');
+  const password = await bcrypt.hash('admin123', 10);
 
-  // Example: Create a default admin user
   const admin = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
       email: 'admin@example.com',
-      name: 'Admin User',
-      password: 'hashed-password-here', // In real app, hash the password
+      firstName: 'Admin',
+      lastName: 'User',
+      password,
       role: 'ADMIN',
     },
   });

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { CreateUserDto, IUser } from '@my-monorepo/types';
+import { CreateUserDto, IUser, SignInDto } from '@my-monorepo/types';
 
 import { AuthService } from './auth.service';
 
@@ -16,8 +16,12 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() createUserDto: CreateUserDto): Promise<IUser> {
-    console.log('Received signup request:', createUserDto);
     return this.authService.signup(createUserDto);
+  }
+
+  @Post('signin')
+  async signIn(@Body() signInDto: SignInDto): Promise<IUser> {
+    return this.authService.signIn(signInDto);
   }
 
   @Get('users/:id')

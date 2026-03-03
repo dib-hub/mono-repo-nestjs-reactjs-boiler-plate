@@ -11,6 +11,11 @@ export interface IUserSignUp {
   confirmPassword: string;
 }
 
+export interface IUserSignIn {
+  email: string;
+  password: string;
+}
+
 export interface IUserAuthResponse {
   id: string;
   email: string;
@@ -70,6 +75,29 @@ export const getUserById = createAsyncThunk<IUserAuthResponse, string, { rejectV
       }
 
       return rejectWithValue('Failed to fetch user.');
+    }
+  }
+);
+
+export const userSignIn = createAsyncThunk<IUserAuthResponse, IUserSignIn, { rejectValue: string }>(
+  'auth/userSignIn',
+  async (credentials: IUserSignIn, { rejectWithValue }) => {
+    try {
+      const response = await authInstance.post('signin', credentials);
+      if (response && response.data) {
+        return response.data as IUserAuthResponse;
+      }
+      throw new Error('No response data received');
+    } catch (err: unknown) {
+      if (axios.isAxiosError<{ message?: string }>(err)) {
+        return rejectWithValue(err.response?.data?.message ?? 'Signin failed. Please try again.');
+      }
+
+      if (err instanceof Error) {
+        return rejectWithValue(err.message);
+      }
+
+      return rejectWithValue('Signin failed. Please try again.');
     }
   }
 );

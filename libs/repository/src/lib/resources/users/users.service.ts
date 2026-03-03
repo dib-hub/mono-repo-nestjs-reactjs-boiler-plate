@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto, IUser } from '@my-monorepo/types';
+import { CreateUserDto, IUser, SignInDto } from '@my-monorepo/types';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from '../../prisma.service';
@@ -11,39 +11,21 @@ export class UsersService {
   private toPublicUser(user: {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     createdAt: Date;
     updatedAt: Date;
   }): IUser {
-    const { firstName, lastName } = this.splitName(user.name);
-
     return {
       id: user.id,
       email: user.email,
-      firstName,
-      lastName,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role as IUser['role'],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
-  }
-
-  private splitName(name: string): { firstName: string; lastName: string } {
-    const normalized = name.trim();
-    if (!normalized) {
-      return { firstName: '', lastName: '' };
-    }
-
-    const [firstName, ...rest] = normalized.split(/\s+/);
-    return {
-      firstName: firstName ?? '',
-      lastName: rest.join(' '),
-    };
-  }
-
-  private buildFullName(firstName: string, lastName: string): string {
-    return [firstName.trim(), lastName.trim()].filter(Boolean).join(' ');
   }
 
   async findAll(): Promise<IUser[]> {
@@ -51,7 +33,8 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -67,7 +50,8 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -87,7 +71,8 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -115,8 +100,6 @@ export class UsersService {
       throw new BadRequestException('Passwords do not match');
     }
 
-    console.log('user email', email);
-
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
       select: { id: true },
@@ -130,13 +113,15 @@ export class UsersService {
     const createdUser = await this.prisma.user.create({
       data: {
         email,
-        name: this.buildFullName(firstName, lastName),
+        firstName,
+        lastName,
         password: hashedPassword,
       },
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -144,5 +129,33 @@ export class UsersService {
     });
 
     return this.toPublicUser(createdUser);
+  }
+
+  async signIn(signInDto: SignInDto): Promise<IUser> {
+    const email = signInDto.email.trim().toLowerCase();
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        password: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid email or password');
+    }
+
+    const isPasswordValid = await bcrypt.compare(signInDto.password, user.password);
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid email or password');
+    }
+
+    return this.toPublicUser(user);
   }
 }
