@@ -11,6 +11,7 @@ module.exports = [
       '**/out-tsc',
       '**/test-output',
       '**/node_modules',
+      '**/generated/**',
       '**/webpack.config.js',
       '**/prisma.config.ts',
       '**/tailwind.config.js',

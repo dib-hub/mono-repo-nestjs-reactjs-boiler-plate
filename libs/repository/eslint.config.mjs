@@ -1,7 +1,7 @@
 import baseConfig from '../../eslint.config.js';
 
 export default [
-  { ignores: ['src/lib/generated/**'] },
+  { ignores: ['libs/repository/src/lib/generated/**', '**/generated/**'] },
   ...baseConfig,
   {
     rules: {
