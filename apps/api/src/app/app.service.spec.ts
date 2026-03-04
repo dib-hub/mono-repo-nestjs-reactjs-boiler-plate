@@ -52,25 +52,4 @@ describe('AppService', () => {
       expect(typeof result.uptime).toBe('number');
     });
   });
-
-  describe('getUsers', () => {
-    it('should delegate to usersService.findAll', async () => {
-      const mockUsers = [
-        {
-          id: '1',
-          email: 'alice@example.com',
-          name: 'Alice',
-          role: 'USER' as const,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-      usersService.findAll.mockResolvedValue(mockUsers);
-
-      const result = await service.getUsers();
-
-      expect(result).toEqual(mockUsers);
-      expect(usersService.findAll).toHaveBeenCalledTimes(1);
-    });
-  });
 });

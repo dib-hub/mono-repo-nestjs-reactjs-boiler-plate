@@ -7,11 +7,11 @@ export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
   async signup(createUserDto: CreateUserDto): Promise<IUser> {
-    return this.usersService.create(createUserDto);
+    return await this.usersService.create(createUserDto);
   }
 
   async signIn(signInDto: SignInDto): Promise<IUser> {
-    return this.usersService.signIn(signInDto);
+    return await this.usersService.signIn(signInDto);
   }
 
   async getUserById(id: string): Promise<IUser> {

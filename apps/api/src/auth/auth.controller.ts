@@ -16,17 +16,17 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() createUserDto: CreateUserDto): Promise<IUser> {
-    return this.authService.signup(createUserDto);
+    return await this.authService.signup(createUserDto);
   }
 
   @Post('signin')
   async signIn(@Body() signInDto: SignInDto): Promise<IUser> {
-    return this.authService.signIn(signInDto);
+    return await this.authService.signIn(signInDto);
   }
 
   @Get('users/:id')
   async getUserById(@Param('id') id: string): Promise<IUser> {
-    return this.authService.getUserById(id);
+    return await this.authService.getUserById(id);
   }
 
   // @Post('users')

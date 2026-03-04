@@ -4,7 +4,7 @@ jest.mock('@my-monorepo/database', () => ({
 }));
 
 import { BadRequestException } from '@nestjs/common';
-import { IUser, CreateUserDto, SignInDto } from '@my-monorepo/types';
+import { IUser, CreateUserDto, SignInDto, UserRole } from '@my-monorepo/types';
 import { UsersService } from '@my-monorepo/database';
 
 import { AuthService } from './auth.service';
@@ -27,7 +27,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AuthService(mockUsersService);
+    service = new AuthService(mockUsersService as unknown as UsersService);
   });
 
   it('should delegate signup to usersService.create', async () => {
@@ -37,7 +37,7 @@ describe('AuthService', () => {
       email: 'a@a.com',
       firstName: 'A',
       lastName: 'B',
-      role: 'USER',
+      role: UserRole.USER,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -54,7 +54,7 @@ describe('AuthService', () => {
       email: 'a@a.com',
       firstName: '',
       lastName: '',
-      role: 'USER',
+      role: UserRole.USER,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -65,7 +65,7 @@ describe('AuthService', () => {
   });
 
   it('getUserById should return user when found', async () => {
-    const user = { id: 'foo' } as IUser;
+    const user = { id: 'foo', role: UserRole.USER } as IUser;
     mockUsersService.findById.mockResolvedValue(user);
     await expect(service.getUserById('foo')).resolves.toBe(user);
   });
