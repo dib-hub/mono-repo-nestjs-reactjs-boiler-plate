@@ -9,7 +9,7 @@ export interface IUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
 }

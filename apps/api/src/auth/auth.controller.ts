@@ -1,26 +1,22 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { CreateUserDto, IUser, SignInDto } from '@my-monorepo/types';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { IUser, REST_RESOURCE } from '@my-monorepo/types';
+import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
+import { CreateUserDto, SignInDto, AuthResponseDto } from './dto/user.dto';
 
-@Controller('auth')
+@Controller(REST_RESOURCE.AUTH)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get('us')
-  getUser(): object {
-    return {
-      msg: 'Hello from AuthController',
-    };
-  }
-
-  @Post('signup')
-  async signUp(@Body() createUserDto: CreateUserDto): Promise<IUser> {
+  @Post(REST_RESOURCE.SIGNUP)
+  async signUp(@Body() createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     return await this.authService.signup(createUserDto);
   }
 
-  @Post('signin')
-  async signIn(@Body() signInDto: SignInDto): Promise<IUser> {
+  @UseGuards(AuthGuard('local'))
+  @Post(REST_RESOURCE.SIGNIN)
+  async signIn(@Body() signInDto: SignInDto): Promise<AuthResponseDto> {
     return await this.authService.signIn(signInDto);
   }
 
@@ -28,14 +24,4 @@ export class AuthController {
   async getUserById(@Param('id') id: string): Promise<IUser> {
     return await this.authService.getUserById(id);
   }
-
-  // @Post('users')
-  // async createUser(@Body() createUserDto: CreateUserDto) {
-  //   return this.authService.signup(createUserDto);
-  // }
-
-  // @Get('users/:id')
-  // async getUserById(@Param('id') id: string) {
-  //   return this.authService.getUserById(id);
-  // }
 }

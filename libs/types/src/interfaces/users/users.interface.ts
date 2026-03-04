@@ -1,7 +1,8 @@
-export interface IUserWithPassword {
+export interface IUser {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   password: string;
   role: 'ADMIN' | 'USER' | 'GUEST';
   createdAt: Date;

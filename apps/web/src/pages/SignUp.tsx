@@ -26,9 +26,9 @@ export const SignUp: React.FC = () => {
   useEffect(() => {
     if (success && user) {
       setLocalError(null);
-      // Redirect to home or next page after successful signup
+      // Redirect to dashboard after successful signup
       setTimeout(() => {
-        navigate('/');
+        navigate('/dashboard');
       }, 1500);
     }
   }, [success, user, navigate]);

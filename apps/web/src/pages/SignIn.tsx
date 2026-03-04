@@ -25,7 +25,7 @@ export const SignIn: React.FC = () => {
     if (success && user) {
       setLocalError(null);
       setTimeout(() => {
-        navigate('/');
+        navigate('/dashboard');
       }, 1000);
     }
   }, [success, user, navigate]);

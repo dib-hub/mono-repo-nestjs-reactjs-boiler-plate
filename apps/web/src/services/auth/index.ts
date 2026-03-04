@@ -26,7 +26,12 @@ export interface IUserAuthResponse {
   updatedAt: string;
 }
 
-export const userSignUp = createAsyncThunk<IUserAuthResponse, IUserSignUp, { rejectValue: string }>(
+export interface IAuthResponse {
+  user: IUserAuthResponse;
+  accessToken: string;
+}
+
+export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectValue: string }>(
   'auth/userSignUp',
   async (userData: IUserSignUp, { rejectWithValue }) => {
     try {
@@ -39,7 +44,7 @@ export const userSignUp = createAsyncThunk<IUserAuthResponse, IUserSignUp, { rej
       });
 
       if (response && response.data) {
-        return response.data as IUserAuthResponse;
+        return response.data as IAuthResponse;
       }
       throw new Error('No response data received');
     } catch (err: unknown) {
@@ -79,13 +84,13 @@ export const getUserById = createAsyncThunk<IUserAuthResponse, string, { rejectV
   }
 );
 
-export const userSignIn = createAsyncThunk<IUserAuthResponse, IUserSignIn, { rejectValue: string }>(
+export const userSignIn = createAsyncThunk<IAuthResponse, IUserSignIn, { rejectValue: string }>(
   'auth/userSignIn',
   async (credentials: IUserSignIn, { rejectWithValue }) => {
     try {
       const response = await authInstance.post('signin', credentials);
       if (response && response.data) {
-        return response.data as IUserAuthResponse;
+        return response.data as IAuthResponse;
       }
       throw new Error('No response data received');
     } catch (err: unknown) {
