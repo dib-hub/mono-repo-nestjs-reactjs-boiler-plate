@@ -3,4 +3,4 @@ export * from './lib/prisma.service';
 export * from './lib/resources/users/users.module';
 export * from './lib/resources/users/users.service';
 export * from './lib/resources/profiles/profiles.module';
-export * from './lib/resources/profiles/profiles.service';
+export * from './lib/resources/profiles/profiles.repository';
