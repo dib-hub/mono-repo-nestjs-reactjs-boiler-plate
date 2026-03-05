@@ -4,10 +4,12 @@ jest.mock('@my-monorepo/database', () => ({
 }));
 
 import { BadRequestException } from '@nestjs/common';
-import { IUser, CreateUserDto, SignInDto, UserRole } from '@my-monorepo/types';
+import { IUser, UserRole } from '@my-monorepo/types';
 import { UsersService } from '@my-monorepo/database';
 
 import { AuthService } from './auth.service';
+import { CreateUserDto } from './dto/user.dto';
+import { SignInDto } from './dto/auth.dto';
 
 // minimal typed mock for UsersService
 type UsersServiceMock = Partial<UsersService> & {
@@ -22,12 +24,17 @@ const mockUsersService: UsersServiceMock = {
   findById: jest.fn(),
 };
 
+const mockJwtService = {
+  sign: jest.fn(),
+  verify: jest.fn(),
+};
+
 describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AuthService(mockUsersService as unknown as UsersService);
+    service = new AuthService(mockUsersService as unknown as UsersService, mockJwtService as any);
   });
 
   it('should delegate signup to usersService.create', async () => {

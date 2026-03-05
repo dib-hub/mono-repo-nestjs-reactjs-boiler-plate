@@ -1,14 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
-import {
-  IUser,
-  CreateUserDto,
-  SignInDto,
-  UserRole,
-  NestPassportMockModule,
-} from '@my-monorepo/types';
+import { IUser, UserRole, NestPassportMockModule } from '@my-monorepo/types';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CreateUserDto } from './dto/user.dto';
+import { SignInDto } from './dto/auth.dto';
 
 jest.mock('@my-monorepo/database', () => ({
   UsersService: class {},
@@ -54,13 +50,6 @@ describe('AuthController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  describe('getUser', () => {
-    it('should return a hello message', () => {
-      const result = controller.getUser();
-      expect(result).toEqual({ msg: 'Hello from AuthController' });
-    });
   });
 
   describe('signUp', () => {

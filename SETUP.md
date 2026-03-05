@@ -163,7 +163,7 @@ monorepo-template/
 │           └── interfaces/       # API contracts
 │
 ├── .env.example          # Environment variable template
-├── docker-compose.yml    # Docker services
+├── docker-compose.dev.yml    # Docker services
 ├── nx.json              # NX workspace config
 ├── package.json         # Dependencies
 └── README.md            # Main documentation

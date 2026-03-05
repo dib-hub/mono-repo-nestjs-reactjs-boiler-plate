@@ -9,6 +9,7 @@ import SignUp from '../pages/SignUp';
 import ResetPassword from '../pages/ResetPassword';
 import ForgotPassword from '../pages/ForgotPassword';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import ProfilePage from '../pages/Profile';
 
 function App(): JSX.Element {
   return (
@@ -27,6 +28,7 @@ function App(): JSX.Element {
             </ProtectedRoute>
           }
         />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Layout>
   );

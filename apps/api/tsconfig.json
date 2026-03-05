@@ -21,10 +21,11 @@
     "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "strictPropertyInitialization": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": ["./node_modules/@types", "../../../libs/types/express.d.ts"]
+    "typeRoots": ["../../node_modules/@types"]
   }
 }

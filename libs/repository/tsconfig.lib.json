@@ -8,5 +8,6 @@
     "typeRoots": ["../../node_modules/@types"]
   },
   "include": ["src/**/*.ts", "prisma/**/*.ts"],
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "files": []
 }

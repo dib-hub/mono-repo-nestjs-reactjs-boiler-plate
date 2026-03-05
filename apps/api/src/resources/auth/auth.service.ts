@@ -1,10 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { UsersService } from '@my-monorepo/database';
-import { IUser } from '@my-monorepo/types';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
-import { CreateUserDto, SignInDto, AuthResponseDto } from './dto/user.dto';
+import { CreateUserDto, UserDto } from './dto/user.dto';
+import { AuthResponseDto, SignInDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,19 +13,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  private toPublicUser(user: IUser): IUser {
-    return {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-  }
-
-  async validateUser(email: string, password: string) {
+  async validateUser(email: string, password: string): Promise<UserDto | null> {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) return null;
@@ -34,30 +22,16 @@ export class AuthService {
 
     if (!isMatch) return null;
 
-    return user;
+    return user as UserDto;
   }
 
   async signup(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
-    const email = createUserDto.email.trim().toLowerCase();
-    const firstName = createUserDto.firstName.trim();
-    const lastName = createUserDto.lastName.trim();
-
-    if (!firstName || !lastName) {
-      throw new BadRequestException('First name and last name are required');
-    }
-
-    const existingUser = await this.usersService.findByEmail(email);
-
-    if (existingUser) {
-      throw new BadRequestException('User with this email already exists');
-    }
-
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     const user = await this.usersService.create({
-      email,
-      firstName,
-      lastName,
+      email: createUserDto.email,
+      firstName: createUserDto.firstName,
+      lastName: createUserDto.lastName,
       password: hashedPassword,
     });
 
@@ -65,7 +39,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return {
-      user: this.toPublicUser(user),
+      user: user as UserDto,
       accessToken,
     };
   }
@@ -89,18 +63,18 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return {
-      user: this.toPublicUser(user),
+      user: user as UserDto,
       accessToken,
     };
   }
 
-  async getUserById(id: string): Promise<IUser> {
+  async getUserById(id: string): Promise<UserDto> {
     const user = await this.usersService.findById(id);
 
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    return this.toPublicUser(user as IUser);
+    return user as UserDto;
   }
 }

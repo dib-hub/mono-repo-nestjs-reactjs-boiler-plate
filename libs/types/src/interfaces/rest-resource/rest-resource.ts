@@ -4,4 +4,6 @@ export const REST_RESOURCE = {
   AUTH: 'auth',
   SIGNUP: 'signup',
   SIGNIN: 'signin',
+  ID: 'id',
+  PROFILES: 'profiles',
 };

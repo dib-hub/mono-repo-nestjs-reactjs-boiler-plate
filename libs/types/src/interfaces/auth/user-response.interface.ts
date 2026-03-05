@@ -1,10 +1,6 @@
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-  GUEST = 'GUEST',
-}
+import { UserRole } from '../../entities/user';
 
-export interface IUser {
+export interface IUserResponse {
   id: string;
   email: string;
   firstName: string;

@@ -1,9 +1,10 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { IUser, REST_RESOURCE } from '@my-monorepo/types';
+import { REST_RESOURCE, REST_RESOURCE_ID } from '@my-monorepo/types';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
-import { CreateUserDto, SignInDto, AuthResponseDto } from './dto/user.dto';
+import { CreateUserDto, UserDto } from './dto/user.dto';
+import { AuthResponseDto, SignInDto } from './dto/auth.dto';
 
 @Controller(REST_RESOURCE.AUTH)
 export class AuthController {
@@ -14,14 +15,14 @@ export class AuthController {
     return await this.authService.signup(createUserDto);
   }
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('local')) // TODO: yet to be asked
   @Post(REST_RESOURCE.SIGNIN)
   async signIn(@Body() signInDto: SignInDto): Promise<AuthResponseDto> {
     return await this.authService.signIn(signInDto);
   }
 
-  @Get('users/:id')
-  async getUserById(@Param('id') id: string): Promise<IUser> {
+  @Get(`${REST_RESOURCE.USERS}/${REST_RESOURCE_ID.ID}`)
+  async getUserById(@Param(REST_RESOURCE.ID) id: string): Promise<UserDto> {
     return await this.authService.getUserById(id);
   }
 }

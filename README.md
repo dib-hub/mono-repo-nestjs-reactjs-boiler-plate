@@ -129,7 +129,7 @@ monorepo-template/
 │       └── README.md
 │
 ├── .env.example             # Environment template
-├── docker-compose.yml       # PostgreSQL setup
+├── docker-compose.dev.yml       # PostgreSQL setup
 ├── nx.json                  # NX configuration
 ├── tsconfig.base.json       # Root TypeScript config
 ├── package.json             # Root dependencies
