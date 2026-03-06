@@ -9,13 +9,14 @@ import { ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
 import { ProfilesService } from './profiles.service';
 import { UpsertProfileDto } from './dtos/profile.dto';
 
+// Mock matches the actual ProfilesRepoService methods called by ProfilesService
 type ProfilesRepoServiceMock = Partial<ProfilesRepoService> & {
-  getProfileByUserId: jest.Mock;
+  getProfile: jest.Mock;
   upsertProfile: jest.Mock;
 };
 
 const mockProfilesRepoService: ProfilesRepoServiceMock = {
-  getProfileByUserId: jest.fn(),
+  getProfile: jest.fn(),
   upsertProfile: jest.fn(),
 };
 
@@ -40,16 +41,18 @@ describe('ProfilesService', () => {
 
   describe('getProfileByUserId', () => {
     it('should return profile for a given userId', async () => {
-      mockProfilesRepoService.getProfileByUserId.mockResolvedValue(mockProfile);
+      mockProfilesRepoService.getProfile.mockResolvedValue(mockProfile);
 
       const result = await service.getProfileByUserId('user-1');
 
       expect(result).toBe(mockProfile);
-      expect(mockProfilesRepoService.getProfileByUserId).toHaveBeenCalledWith('user-1');
+      expect(mockProfilesRepoService.getProfile).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { userId: 'user-1' } })
+      );
     });
 
     it('should propagate NotFoundException if profile not found', async () => {
-      mockProfilesRepoService.getProfileByUserId.mockRejectedValue(
+      mockProfilesRepoService.getProfile.mockRejectedValue(
         new NotFoundException('Profile not found')
       );
 
@@ -70,7 +73,13 @@ describe('ProfilesService', () => {
       const result = await service.upsertProfile('user-1', dto);
 
       expect(result).toBe(mockProfile);
-      expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith('user-1', dto);
+      expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'user-1' },
+          create: expect.objectContaining({ name: dto.name, email: dto.email, userId: 'user-1' }),
+          update: expect.objectContaining({ name: dto.name, email: dto.email }),
+        })
+      );
     });
   });
 });

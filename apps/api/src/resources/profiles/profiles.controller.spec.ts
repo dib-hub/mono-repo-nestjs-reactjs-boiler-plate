@@ -1,3 +1,6 @@
+// Must mock @my-monorepo/database before any module that transitively imports
+// the Prisma generated client (which uses import.meta — ESM-only, incompatible with Jest CJS)
+jest.mock('@my-monorepo/database', () => ({}));
 jest.mock('./profiles.service');
 
 import { IProfile } from '@my-monorepo/types';
