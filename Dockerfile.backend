@@ -1,0 +1,58 @@
+# ─────────────────────────────────────────────
+# Stage 1: Builder
+# ─────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy workspace manifests first (better layer caching)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY libs/repository/package.json ./libs/repository/package.json
+COPY libs/types/package.json ./libs/types/package.json
+
+# Install ALL dependencies (including devDeps needed for build)
+RUN pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install --frozen-lockfile --shamefully-hoist
+
+# Copy full source
+COPY . .
+
+# Generate Prisma client before building
+RUN pnpm --filter @my-monorepo/repository exec prisma generate --schema=./prisma/schema.prisma
+
+# Build API with NX (webpack bundles everything — app + workspace libs — into one file)
+RUN pnpm exec nx build api --configuration=production
+
+# Prune devDependencies so only prod deps remain in node_modules
+RUN CI=true pnpm prune --prod
+
+# ─────────────────────────────────────────────
+# Stage 2: Runtime (minimal image)
+# ─────────────────────────────────────────────
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+# Copy the webpack bundle from builder
+COPY --from=builder /app/dist/apps/api ./dist
+
+# Copy Prisma schema + migrations (needed for migrate deploy at startup)
+COPY --from=builder /app/libs/repository/prisma ./prisma
+
+# Copy Prisma config (Prisma 7 reads datasource URL from here)
+COPY --from=builder /app/libs/repository/prisma.config.ts ./prisma.config.ts
+
+# Copy pruned node_modules from builder (no network calls needed)
+COPY --from=builder /app/node_modules ./node_modules
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })" || exit 1
+
+# Run migrations then start the app
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/main.js"]

@@ -21,7 +21,11 @@
     "db:studio": "pnpm -C libs/repository exec prisma studio --schema=prisma/schema.prisma",
     "db:seed": "pnpm -C libs/repository exec node --loader ts-node/esm --experimental-specifier-resolution=node -r dotenv/config prisma/seed.ts",
     "db:reset": "pnpm -C libs/repository exec prisma migrate reset --force --schema=prisma/schema.prisma",
-    "graph": "nx graph"
+    "graph": "nx graph",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d --build",
+    "docker:prod:down": "docker-compose -f docker-compose.prod.yml down",
+    "docker:prod:logs": "docker-compose -f docker-compose.prod.yml logs -f"
   },
   "private": true,
   "dependencies": {
@@ -31,6 +35,7 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/swagger": "^11.2.6",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "bcrypt": "^6.0.0",
@@ -42,6 +47,7 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.0",
     "pnpm": "^10.30.3",
+    "prisma": "^7.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.0",
@@ -89,7 +95,6 @@
     "nx": "^17.3.0",
     "postcss": "^8.4.32",
     "prettier": "^3.1.0",
-    "prisma": "^7.0.0",
     "tailwindcss": "^3.4.0",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
@@ -101,5 +106,19 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=8.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@parcel/watcher",
+      "@prisma/engines",
+      "@scarf/scarf",
+      "@swc/core",
+      "bcrypt",
+      "esbuild",
+      "nx",
+      "prisma",
+      "unrs-resolver"
+    ]
   }
 }

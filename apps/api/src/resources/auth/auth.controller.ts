@@ -15,7 +15,7 @@ export class AuthController {
     return await this.authService.signup(createUserDto);
   }
 
-  @UseGuards(AuthGuard('local')) // TODO: yet to be asked
+  @UseGuards(AuthGuard('local'))
   @Post(REST_RESOURCE.SIGNIN)
   async signIn(@Body() signInDto: SignInDto): Promise<AuthResponseDto> {
     return await this.authService.signIn(signInDto);

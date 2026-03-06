@@ -8,7 +8,6 @@ export interface IUserSignUp {
   lastName: string;
   email: string;
   password: string;
-  confirmPassword: string;
 }
 
 export interface IUserSignIn {
@@ -40,7 +39,6 @@ export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectV
         lastName: userData.lastName,
         email: userData.email,
         password: userData.password,
-        confirmPassword: userData.confirmPassword,
       });
 
       if (response && response.data) {

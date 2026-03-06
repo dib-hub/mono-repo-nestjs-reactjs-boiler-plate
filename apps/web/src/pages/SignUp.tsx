@@ -83,7 +83,6 @@ export const SignUp: React.FC = () => {
         lastName: values.lastName,
         email: values.email,
         password: values.password,
-        confirmPassword: values.confirmPassword,
       };
 
       try {
