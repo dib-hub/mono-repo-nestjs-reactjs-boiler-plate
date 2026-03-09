@@ -2,9 +2,10 @@ import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 
 import { AppModule } from './app/app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions-filter';
 
 dotenv.config();
 
@@ -32,8 +33,10 @@ async function bootstrap(): Promise<void> {
     })
   );
 
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   await app.listen(port, () => {
-    console.log(`🚀 Server is running on http://localhost:${port}/api`);
+    Logger.log(`🚀 Server is running on http://localhost:${port}/api`, 'Bootstrap');
   });
 }
 
