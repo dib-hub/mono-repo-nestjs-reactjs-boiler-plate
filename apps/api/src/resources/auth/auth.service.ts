@@ -1,10 +1,11 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '@my-monorepo/database';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UserRole } from '@my-monorepo/types';
 
 import { CreateUserDto, UserDto } from './dto/user.dto';
-import { AuthResponseDto, SignInDto } from './dto/auth.dto';
+import { AuthResponseDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,21 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService
   ) {}
+
+  private toUserDto(user: UserDto & { password?: string }): UserDto {
+    const { password: _password, ...safeUser } = user;
+    return safeUser as UserDto;
+  }
+
+  private buildAuthResponse(user: UserDto): AuthResponseDto {
+    const payload = { email: user.email, sub: user.id };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      user,
+      accessToken,
+    };
+  }
 
   async validateUser(email: string, password: string): Promise<UserDto | null> {
     const user = await this.usersService.findByEmail(email);
@@ -22,10 +38,16 @@ export class AuthService {
 
     if (!isMatch) return null;
 
-    return user as UserDto;
+    return this.toUserDto(user as UserDto & { password?: string });
   }
 
   async signup(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
+    const existingUser = await this.usersService.findByEmail(createUserDto.email);
+
+    if (existingUser) {
+      throw new BadRequestException('Email already in use');
+    }
+
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     const user = await this.usersService.create({
@@ -33,39 +55,24 @@ export class AuthService {
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       password: hashedPassword,
+      role: UserRole.USER, // Default role, can be adjusted as needed
     });
 
-    const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload);
-
-    return {
-      user: user as UserDto,
-      accessToken,
-    };
+    return this.buildAuthResponse(this.toUserDto(user as UserDto & { password?: string }));
   }
 
-  async signIn(signInDto: SignInDto): Promise<AuthResponseDto> {
-    const email = signInDto.email.trim().toLowerCase();
+  async signIn(user: UserDto): Promise<AuthResponseDto> {
+    return await this.buildAuthResponse(user);
+  }
 
-    const user = await this.usersService.findByEmail(email);
+  async signInWithCredentials(email: string, password: string): Promise<AuthResponseDto> {
+    const user = await this.validateUser(email, password);
 
     if (!user) {
-      throw new BadRequestException('Invalid email or password');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordValid = await bcrypt.compare(signInDto.password, user.password);
-
-    if (!isPasswordValid) {
-      throw new BadRequestException('Invalid email or password');
-    }
-
-    const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload);
-
-    return {
-      user: user as UserDto,
-      accessToken,
-    };
+    return this.buildAuthResponse(user);
   }
 
   async getUserById(id: string): Promise<UserDto> {
@@ -75,6 +82,6 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
-    return user as UserDto;
+    return this.toUserDto(user as UserDto & { password?: string });
   }
 }

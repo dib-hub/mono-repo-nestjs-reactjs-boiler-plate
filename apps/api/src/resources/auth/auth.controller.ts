@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { REST_RESOURCE, REST_RESOURCE_ID } from '@my-monorepo/types';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { REST_RESOURCE, type JwtAuthRequest } from '@my-monorepo/types';
 
 import { AuthService } from './auth.service';
 import { CreateUserDto, UserDto } from './dto/user.dto';
 import { AuthResponseDto, SignInDto } from './dto/auth.dto';
+import { Public } from '../../common/guards/public.decorator';
+import { LocalAuthGuard } from '../../common/guards/local.guard';
 
 @Controller(REST_RESOURCE.AUTH)
 export class AuthController {
@@ -15,14 +16,15 @@ export class AuthController {
     return await this.authService.signup(createUserDto);
   }
 
-  @UseGuards(AuthGuard('local'))
   @Post(REST_RESOURCE.SIGNIN)
+  @Public()
+  @UseGuards(LocalAuthGuard)
   async signIn(@Body() signInDto: SignInDto): Promise<AuthResponseDto> {
-    return await this.authService.signIn(signInDto);
+    return this.authService.signInWithCredentials(signInDto.email, signInDto.password);
   }
 
-  @Get(`${REST_RESOURCE.USERS}/${REST_RESOURCE_ID.ID}`)
-  async getUserById(@Param(REST_RESOURCE.ID) id: string): Promise<UserDto> {
-    return await this.authService.getUserById(id);
+  @Get(REST_RESOURCE.ME as string)
+  async getUserById(@Req() req: JwtAuthRequest): Promise<UserDto> {
+    return this.authService.getUserById(req.user.userId);
   }
 }

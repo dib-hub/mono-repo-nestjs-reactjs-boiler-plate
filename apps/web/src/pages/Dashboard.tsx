@@ -1,15 +1,21 @@
 import { JSX } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import { logout } from '../redux/slices/authSlice';
 import { AppDispatch, RootState } from '../redux/store';
 
 const Dashboard = (): JSX.Element => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.authSlice);
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     dispatch(logout());
+  };
+
+  const handleProfile = (): void => {
+    navigate('/profile');
   };
 
   return (
@@ -31,6 +37,12 @@ const Dashboard = (): JSX.Element => {
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Logout
+          </button>
+          <button
+            onClick={handleProfile}
+            className="bg-violet-500 hover:bg-violet-600 text-white px-6 py-2 mx-2 rounded-lg transition-colors"
+          >
+            Profile
           </button>
         </div>
       </div>

@@ -33,6 +33,16 @@ const mockProfile: IProfile = {
 
 describe('ProfilesService', () => {
   let service: ProfilesService;
+  const profileSelect = {
+    id: true,
+    name: true,
+    email: true,
+    linkedInUrl: true,
+    githubUrl: true,
+    userId: true,
+    createdAt: true,
+    updatedAt: true,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,9 +56,16 @@ describe('ProfilesService', () => {
       const result = await service.getProfileByUserId('user-1');
 
       expect(result).toBe(mockProfile);
+<<<<<<< Updated upstream
       expect(mockProfilesRepoService.getProfile).toHaveBeenCalledWith(
         expect.objectContaining({ where: { userId: 'user-1' } })
       );
+=======
+      expect(mockProfilesRepoService.getProfile).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        select: profileSelect,
+      });
+>>>>>>> Stashed changes
     });
 
     it('should propagate NotFoundException if profile not found', async () => {
@@ -73,6 +90,7 @@ describe('ProfilesService', () => {
       const result = await service.upsertProfile('user-1', dto);
 
       expect(result).toBe(mockProfile);
+<<<<<<< Updated upstream
       expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { userId: 'user-1' },
@@ -80,6 +98,25 @@ describe('ProfilesService', () => {
           update: expect.objectContaining({ name: dto.name, email: dto.email }),
         })
       );
+=======
+      expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        create: {
+          name: dto.name,
+          email: dto.email,
+          linkedInUrl: dto.linkedInUrl,
+          githubUrl: dto.githubUrl,
+          userId: 'user-1',
+        },
+        update: {
+          name: dto.name,
+          email: dto.email,
+          linkedInUrl: dto.linkedInUrl,
+          githubUrl: dto.githubUrl,
+        },
+        select: profileSelect,
+      });
+>>>>>>> Stashed changes
     });
   });
 });

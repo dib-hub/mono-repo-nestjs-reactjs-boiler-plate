@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import { UserRole } from '@my-monorepo/types';
-import { ISignIn } from '@my-monorepo/types/src/interfaces/auth/sign-in.interface';
-import { IUpdateUser } from '@my-monorepo/types/src/interfaces/auth/update-user.interface';
-import { IUserResponse } from '@my-monorepo/types/src/interfaces/auth/user-response.interface';
-import { IAuthResponse } from '@my-monorepo/types/src/interfaces/auth/auth-response.interface';
+import type { ISignIn } from '@my-monorepo/types/src/interfaces/auth/sign-in.interface';
+import type { IUpdateUser } from '@my-monorepo/types/src/interfaces/auth/update-user.interface';
+import type { IUserResponse } from '@my-monorepo/types/src/interfaces/auth/user-response.interface';
+import type { IAuthResponse } from '@my-monorepo/types/src/interfaces/auth/auth-response.interface';
 
 export class SignInDto implements ISignIn {
   @ApiProperty({

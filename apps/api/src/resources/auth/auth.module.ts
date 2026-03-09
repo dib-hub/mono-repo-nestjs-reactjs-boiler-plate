@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
-import { PrismaService, UsersModule } from '@my-monorepo/database';
+import { UsersModule } from '@my-monorepo/database';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { LocalStrategy } from '../../auth/strategies/local.strategy';
-import { JwtStrategy } from '../../auth/strategies/jwt.strategy';
+import { JwtStrategy } from '../../common/strategies/jwt-strategy';
+import { LocalStrategy } from '../../common/strategies/local.strategy';
 
 @Module({
   imports: [
-    UsersModule, // Passport is explicitly configured here.
+    UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
     JwtModule.registerAsync({
@@ -29,6 +29,7 @@ import { JwtStrategy } from '../../auth/strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, JwtStrategy, LocalStrategy],
+  exports: [JwtModule],
 })
 export class AuthModule {}

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, IsUrl, Length } from 'class-validator';
-import { IUpsertProfile, IProfileResponse, IProfile } from '@my-monorepo/types';
+import type { IUpsertProfile, IProfileResponse, IProfile } from '@my-monorepo/types';
 
 export class UpsertProfileDto implements IUpsertProfile {
   @ApiProperty({ example: 'John Doe' })

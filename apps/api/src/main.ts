@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import * as dotenv from 'dotenv';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -7,18 +6,28 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app/app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions-filter';
 
-dotenv.config();
-
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
-  const corsOrigin = configService.get<string>('CORS_ORIGIN', 'http://localhost:4200');
+  const corsOrigins = (
+    configService.get<string>('CORS_ORIGIN', 'http://localhost:4200,http://localhost:4201') ?? ''
+  )
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   // Enable CORS
   app.enableCors({
-    origin: corsOrigin,
+    origin: (origin, callback) => {
+      if (!origin || corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin "${origin}" is not allowed by CORS`), false);
+    },
     credentials: true,
   });
 

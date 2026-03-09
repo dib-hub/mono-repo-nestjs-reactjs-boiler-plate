@@ -82,6 +82,29 @@ export const getUserById = createAsyncThunk<IUserAuthResponse, string, { rejectV
   }
 );
 
+export const getCurrentUser = createAsyncThunk<IUserAuthResponse, void, { rejectValue: string }>(
+  'auth/getCurrentUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await authInstance.get('me');
+      if (response && response.data) {
+        return response.data as IUserAuthResponse;
+      }
+      throw new Error('No response data received');
+    } catch (error: unknown) {
+      if (axios.isAxiosError<{ message?: string }>(error)) {
+        return rejectWithValue(error.response?.data?.message ?? 'Failed to fetch current user.');
+      }
+
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+
+      return rejectWithValue('Failed to fetch current user.');
+    }
+  }
+);
+
 export const userSignIn = createAsyncThunk<IAuthResponse, IUserSignIn, { rejectValue: string }>(
   'auth/userSignIn',
   async (credentials: IUserSignIn, { rejectWithValue }) => {

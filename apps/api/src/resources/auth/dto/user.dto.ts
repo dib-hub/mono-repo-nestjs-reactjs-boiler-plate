@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IUser, UserRole } from '@my-monorepo/types';
+import { UserRole, type IUser } from '@my-monorepo/types';
 
 export class CreateUserDto implements Partial<IUser> {
   @ApiProperty({

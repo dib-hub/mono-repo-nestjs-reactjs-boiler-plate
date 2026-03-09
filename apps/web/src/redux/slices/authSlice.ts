@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { userSignIn, userSignUp, getUserById } from '../../services/auth';
+import { userSignIn, userSignUp, getUserById, getCurrentUser } from '../../services/auth';
 
 interface User {
   id: string;
@@ -41,8 +41,7 @@ const authSlice = createSlice({
       const token = localStorage.getItem('token');
       if (token) {
         state.token = token;
-        // Note: In a real app, you might want to decode the token to get user info
-        // For now, we'll assume the user is authenticated if token exists
+        state.error = null;
       }
     },
     logout(state) {
@@ -116,6 +115,28 @@ const authSlice = createSlice({
       .addCase(getUserById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      });
+
+    // Handle getCurrentUser
+    builder
+      .addCase(getCurrentUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.token = localStorage.getItem('token');
+        state.success = true;
+        state.error = null;
+      })
+      .addCase(getCurrentUser.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.token = null;
+        state.success = false;
+        state.error = action.payload as string;
+        localStorage.removeItem('token');
       });
   },
 });

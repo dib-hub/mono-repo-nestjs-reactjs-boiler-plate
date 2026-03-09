@@ -7,6 +7,11 @@ jest.mock('bcrypt', () => ({
   compare: jest.fn().mockResolvedValue(true),
 }));
 
+jest.mock('bcrypt', () => ({
+  hash: jest.fn(),
+  compare: jest.fn(),
+}));
+
 import { BadRequestException } from '@nestjs/common';
 import { IUser, UserRole } from '@my-monorepo/types';
 import { UsersService } from '@my-monorepo/database';
@@ -14,7 +19,6 @@ import * as bcrypt from 'bcrypt';
 
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/user.dto';
-import { SignInDto } from './dto/auth.dto';
 
 type UsersServiceMock = Partial<UsersService> & {
   create: jest.Mock;
@@ -33,6 +37,25 @@ const mockJwtService = {
   verify: jest.fn(),
 };
 
+const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
+
+type UserWithPassword = IUser & { password: string };
+
+const mockUser: IUser = {
+  id: '1',
+  email: 'a@a.com',
+  firstName: 'A',
+  lastName: 'B',
+  role: UserRole.USER,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+const mockUserWithPassword: UserWithPassword = {
+  ...mockUser,
+  password: 'hashed',
+};
+
 describe('AuthService', () => {
   let service: AuthService;
 
@@ -42,17 +65,37 @@ describe('AuthService', () => {
     service = new AuthService(mockUsersService as unknown as UsersService, mockJwtService as any);
   });
 
+<<<<<<< Updated upstream
   it('should signup: hash password, call usersService.create, and return user + token', async () => {
     const dto: CreateUserDto = { email: 'a@a.com', firstName: 'A', lastName: 'B', password: 'pw' };
     const mockUser: IUser = {
       id: '1',
+=======
+  it('validateUser should return sanitized user when credentials are valid', async () => {
+    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
+    mockedBcrypt.compare.mockResolvedValue(true);
+
+    await expect(service.validateUser('A@A.com', 'password')).resolves.toEqual(mockUser);
+    expect(mockUsersService.findByEmail).toHaveBeenCalledWith('a@a.com');
+    expect(mockedBcrypt.compare).toHaveBeenCalledWith('password', 'hashed');
+  });
+
+  it('validateUser should return null when credentials are invalid', async () => {
+    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
+    mockedBcrypt.compare.mockResolvedValue(false);
+
+    await expect(service.validateUser('a@a.com', 'wrong')).resolves.toBeNull();
+  });
+
+  it('signup should throw when email already exists', async () => {
+    const dto: CreateUserDto = {
+>>>>>>> Stashed changes
       email: 'a@a.com',
       firstName: 'A',
       lastName: 'B',
-      role: UserRole.USER,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      password: 'pw1234',
     };
+<<<<<<< Updated upstream
     mockUsersService.create.mockResolvedValue(mockUser);
 
     const result = await service.signup(dto);
@@ -102,12 +145,51 @@ describe('AuthService', () => {
     await expect(service.signIn({ email: 'x@x.com', password: 'wrong' })).rejects.toThrow(
       BadRequestException
     );
+=======
+    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
+
+    await expect(service.signup(dto)).rejects.toThrow(BadRequestException);
+    expect(mockUsersService.create).not.toHaveBeenCalled();
+  });
+
+  it('signup should hash password, create user, and return auth response', async () => {
+    const dto: CreateUserDto = { email: 'a@a.com', firstName: 'A', lastName: 'B', password: 'pw' };
+    mockUsersService.findByEmail.mockResolvedValue(null);
+    mockedBcrypt.hash.mockResolvedValue('hashed-password');
+    mockUsersService.create.mockResolvedValue({
+      ...mockUser,
+      email: 'a@a.com',
+      password: 'hashed-password',
+    });
+    mockJwtService.sign.mockReturnValue('jwt-token');
+
+    await expect(service.signup(dto)).resolves.toEqual({
+      user: mockUser,
+      accessToken: 'jwt-token',
+    });
+    expect(mockUsersService.create).toHaveBeenCalledWith({
+      email: 'a@a.com',
+      firstName: 'A',
+      lastName: 'B',
+      password: 'hashed-password',
+    });
+    expect(mockJwtService.sign).toHaveBeenCalledWith({ email: 'a@a.com', sub: '1' });
+  });
+
+  it('signIn should return auth response', async () => {
+    mockJwtService.sign.mockReturnValue('jwt-token');
+
+    await expect(service.signIn(mockUser)).resolves.toEqual({
+      user: mockUser,
+      accessToken: 'jwt-token',
+    });
+    expect(mockJwtService.sign).toHaveBeenCalledWith({ email: 'a@a.com', sub: '1' });
+>>>>>>> Stashed changes
   });
 
   it('getUserById should return user when found', async () => {
-    const user = { id: 'foo', role: UserRole.USER } as IUser;
-    mockUsersService.findById.mockResolvedValue(user);
-    await expect(service.getUserById('foo')).resolves.toBe(user);
+    mockUsersService.findById.mockResolvedValue(mockUserWithPassword);
+    await expect(service.getUserById('foo')).resolves.toEqual(mockUser);
   });
 
   it('getUserById should throw if not found', async () => {
@@ -115,6 +197,7 @@ describe('AuthService', () => {
     await expect(service.getUserById('foo')).rejects.toThrow(BadRequestException);
   });
 
+<<<<<<< Updated upstream
   it('validateUser should return user when credentials are valid', async () => {
     const mockUser = { id: '1', email: 'a@a.com', password: 'hashed_pw' };
     mockUsersService.findByEmail.mockResolvedValue(mockUser);
@@ -133,5 +216,10 @@ describe('AuthService', () => {
     (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false);
     const result = await service.validateUser('a@a.com', 'wrong');
     expect(result).toBeNull();
+=======
+  it('me should delegate to getUserById', async () => {
+    mockUsersService.findById.mockResolvedValue(mockUserWithPassword);
+    await expect(service.me('1')).resolves.toEqual(mockUser);
+>>>>>>> Stashed changes
   });
 });

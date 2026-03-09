@@ -1,4 +1,4 @@
-import { UserRole } from '../../entities/user';
+import { UserRole } from '../users';
 
 export interface IUpdateUser {
   email?: string;

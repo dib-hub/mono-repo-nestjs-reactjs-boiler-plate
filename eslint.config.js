@@ -18,6 +18,10 @@ module.exports = [
       '**/postcss.config.js',
       '**/vite.config.*',
       '**/eslint.config.*',
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "**/*.test.ts",
+      "**/*.test.tsx",
     ],
   },
   {
