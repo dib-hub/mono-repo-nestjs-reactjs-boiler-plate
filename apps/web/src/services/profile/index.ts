@@ -1,29 +1,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { IProfileResponse, IUpsertProfile } from '@my-monorepo/types';
 
 import { apiInstance } from '../../apis/initialize.instance';
 
-export interface IProfileResponse {
-  id: string;
-  name: string;
-  email: string;
-  linkedInUrl: string | null;
-  githubUrl: string | null;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IUpsertProfilePayload {
-  name: string;
-  email: string;
-  linkedInUrl?: string | null;
-  githubUrl?: string | null;
-}
-
 interface IUpsertProfileRequest {
   userId: string;
-  profileData: IUpsertProfilePayload;
+  profileData: IUpsertProfile;
 }
 
 export const getProfileByUserId = createAsyncThunk<

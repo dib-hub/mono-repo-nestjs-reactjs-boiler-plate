@@ -1,4 +1,4 @@
-import { useState, JSX, FC, FormEvent } from 'react';
+import { useState, JSX, FC, FormEvent, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Button } from '../components/Button';
@@ -10,11 +10,14 @@ export const ForgotPassword: FC = (): JSX.Element => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: FormEvent): void => {
+  const handleSubmit = useCallback((e: FormEvent): void => {
     e.preventDefault();
     setSubmitted(true);
-    console.log({ email });
-  };
+  }, []);
+
+  const handleReset = useCallback((): void => {
+    setSubmitted(false);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
@@ -46,7 +49,7 @@ export const ForgotPassword: FC = (): JSX.Element => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Check your email</h3>
               <p className="text-gray-600 mb-6">We've sent a password reset link to {email}</p>
-              <Button onClick={() => setSubmitted(false)}>Back to forgot password</Button>
+              <Button onClick={handleReset}>Back to forgot password</Button>
             </div>
           )}
 

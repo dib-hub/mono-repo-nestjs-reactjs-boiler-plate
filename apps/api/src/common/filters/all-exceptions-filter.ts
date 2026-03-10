@@ -21,7 +21,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     let message: unknown;
     if (exception instanceof HttpException) {
-      message = exception.getResponse();
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'string') {
+        message = exceptionResponse;
+      } else if (
+        typeof exceptionResponse === 'object' &&
+        exceptionResponse !== null &&
+        'message' in exceptionResponse
+      ) {
+        message = (exceptionResponse as { message: unknown }).message;
+      } else {
+        message = exception.message;
+      }
     } else if (exception instanceof Error) {
       message = exception.message;
     } else {

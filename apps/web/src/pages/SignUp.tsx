@@ -1,21 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
+import { ISignUp, IUserSignUp } from '@my-monorepo/types';
 
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { userSignUp, IUserSignUp } from '../services/auth';
+import { userSignUp } from '../services/auth';
 import { clearError } from '../redux/slices/authSlice';
 import { RootState, AppDispatch } from '../redux/store';
-
-interface SignUpForm {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
 
 export const SignUp: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,8 +26,8 @@ export const SignUp: React.FC = () => {
     }
   }, [success, user, navigate]);
 
-  const validate = (values: SignUpForm): FormikErrors<SignUpForm> => {
-    const errors: FormikErrors<SignUpForm> = {};
+  const validate = useCallback((values: ISignUp): FormikErrors<ISignUp> => {
+    const errors: FormikErrors<ISignUp> = {};
 
     if (!values.firstName.trim()) {
       errors.firstName = 'First name is required';
@@ -63,7 +56,7 @@ export const SignUp: React.FC = () => {
     }
 
     return errors;
-  };
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -97,7 +90,7 @@ export const SignUp: React.FC = () => {
     },
   });
 
-  const displayError = localError || error;
+  const displayError = useMemo(() => localError || error, [localError, error]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">

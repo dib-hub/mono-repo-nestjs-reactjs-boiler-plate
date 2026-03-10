@@ -1,18 +1,12 @@
-import { JSX, useEffect, useMemo, useState } from 'react';
+import { JSX, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { IProfileFormData, IUpsertProfile } from '@my-monorepo/types';
 
 import { clearProfileError, clearProfileSuccess } from '../redux/slices/profileSlice';
 import type { AppDispatch, RootState } from '../redux/store';
-import { getProfileByUserId, upsertProfile, type IUpsertProfilePayload } from '../services/profile';
+import { getProfileByUserId, upsertProfile } from '../services/profile';
 
-interface ProfileFormData {
-  name: string;
-  email: string;
-  linkedInUrl: string;
-  githubUrl: string;
-}
-
-const buildProfileFormDataFromUser = (user: RootState['authSlice']['user']): ProfileFormData => ({
+const buildProfileFormDataFromUser = (user: RootState['authSlice']['user']): IProfileFormData => ({
   name: user ? `${user.firstName} ${user.lastName}`.trim() : '',
   email: user?.email ?? '',
   linkedInUrl: '',
@@ -22,25 +16,25 @@ const buildProfileFormDataFromUser = (user: RootState['authSlice']['user']): Pro
 const ProfilePage = (): JSX.Element => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.authSlice);
-  const { profile, loading, error, success } = useSelector(
+  const { profile, profileUserId, loading, error, success } = useSelector(
     (state: RootState) => state.profileSlice
   );
 
-  const [profileData, setProfileData] = useState<ProfileFormData>(() =>
+  const [profileData, setProfileData] = useState<IProfileFormData>(() =>
     buildProfileFormDataFromUser(user)
   );
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<ProfileFormData>(profileData);
+  const [editData, setEditData] = useState<IProfileFormData>(profileData);
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && profileUserId !== user.id) {
       void dispatch(getProfileByUserId(user.id));
     }
-  }, [dispatch, user?.id]);
+  }, [dispatch, user?.id, profileUserId]);
 
   useEffect(() => {
     if (profile) {
-      const profileFromApi: ProfileFormData = {
+      const profileFromApi: IProfileFormData = {
         name: profile.name,
         email: profile.email,
         linkedInUrl: profile.linkedInUrl ?? '',
@@ -76,21 +70,21 @@ const ProfilePage = (): JSX.Element => {
     };
   }, [dispatch, success]);
 
-  const handleEditChange = (field: keyof ProfileFormData, value: string): void => {
+  const handleEditChange = useCallback((field: keyof IProfileFormData, value: string): void => {
     setEditData((previous) => ({
       ...previous,
       [field]: value,
     }));
-  };
+  }, []);
 
-  const handleSave = async (): Promise<void> => {
+  const handleSave = useCallback(async (): Promise<void> => {
     if (!user?.id) {
       return;
     }
 
     dispatch(clearProfileError());
 
-    const payload: IUpsertProfilePayload = {
+    const payload: IUpsertProfile = {
       name: editData.name.trim(),
       email: editData.email.trim(),
       linkedInUrl: editData.linkedInUrl.trim() || null,
@@ -105,7 +99,7 @@ const ProfilePage = (): JSX.Element => {
     );
 
     if (upsertProfile.fulfilled.match(resultAction)) {
-      const updatedData: ProfileFormData = {
+      const updatedData: IProfileFormData = {
         name: resultAction.payload.name,
         email: resultAction.payload.email,
         linkedInUrl: resultAction.payload.linkedInUrl ?? '',
@@ -116,20 +110,20 @@ const ProfilePage = (): JSX.Element => {
       setEditData(updatedData);
       setIsEditing(false);
     }
-  };
+  }, [user?.id, editData, dispatch]);
 
-  const handleCancel = (): void => {
+  const handleCancel = useCallback((): void => {
     setEditData(profileData);
     setIsEditing(false);
     dispatch(clearProfileError());
-  };
+  }, [profileData, dispatch]);
 
-  const getGreeting = (): string => {
+  const getGreeting = useCallback((): string => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good Morning';
     if (hour < 18) return 'Good Afternoon';
     return 'Good Evening';
-  };
+  }, []);
 
   const profileCompleteness = useMemo(() => {
     const fields = [
@@ -142,14 +136,16 @@ const ProfilePage = (): JSX.Element => {
     return Math.round((completedFields / fields.length) * 100);
   }, [profileData]);
 
-  const renderUrlField = (url: string, emptyText: string): JSX.Element => {
+  const renderUrlField = useCallback((url: string, emptyText: string): JSX.Element => {
     if (!url) {
       return <div className="px-4 py-3 rounded-xl bg-white/50 text-gray-500">{emptyText}</div>;
     }
 
+    const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+
     return (
       <a
-        href={url}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="px-4 py-3 rounded-xl bg-white/50 text-blue-700 hover:text-blue-900 block truncate hover:underline transition"
@@ -157,7 +153,7 @@ const ProfilePage = (): JSX.Element => {
         {url}
       </a>
     );
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200">

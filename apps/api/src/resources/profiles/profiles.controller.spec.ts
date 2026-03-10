@@ -1,13 +1,7 @@
-<<<<<<< Updated upstream
-// Must mock @my-monorepo/database before any module that transitively imports
-// the Prisma generated client (which uses import.meta — ESM-only, incompatible with Jest CJS)
-jest.mock('@my-monorepo/database', () => ({}));
-=======
 jest.mock('@my-monorepo/database', () => ({
   ProfilesService: class {},
 }));
 
->>>>>>> Stashed changes
 jest.mock('./profiles.service');
 
 import { ForbiddenException } from '@nestjs/common';

@@ -56,16 +56,10 @@ describe('ProfilesService', () => {
       const result = await service.getProfileByUserId('user-1');
 
       expect(result).toBe(mockProfile);
-<<<<<<< Updated upstream
-      expect(mockProfilesRepoService.getProfile).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { userId: 'user-1' } })
-      );
-=======
       expect(mockProfilesRepoService.getProfile).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
         select: profileSelect,
       });
->>>>>>> Stashed changes
     });
 
     it('should propagate NotFoundException if profile not found', async () => {
@@ -90,15 +84,6 @@ describe('ProfilesService', () => {
       const result = await service.upsertProfile('user-1', dto);
 
       expect(result).toBe(mockProfile);
-<<<<<<< Updated upstream
-      expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { userId: 'user-1' },
-          create: expect.objectContaining({ name: dto.name, email: dto.email, userId: 'user-1' }),
-          update: expect.objectContaining({ name: dto.name, email: dto.email }),
-        })
-      );
-=======
       expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
         create: {
@@ -116,7 +101,35 @@ describe('ProfilesService', () => {
         },
         select: profileSelect,
       });
->>>>>>> Stashed changes
+    });
+
+    it('should use null for optional fields when not provided', async () => {
+      const dto: UpsertProfileDto = {
+        name: 'John Doe',
+        email: 'john@example.com',
+      };
+      mockProfilesRepoService.upsertProfile.mockResolvedValue(mockProfile);
+
+      const result = await service.upsertProfile('user-1', dto);
+
+      expect(result).toBe(mockProfile);
+      expect(mockProfilesRepoService.upsertProfile).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        create: {
+          name: dto.name,
+          email: dto.email,
+          linkedInUrl: null,
+          githubUrl: null,
+          userId: 'user-1',
+        },
+        update: {
+          name: dto.name,
+          email: dto.email,
+          linkedInUrl: null,
+          githubUrl: null,
+        },
+        select: profileSelect,
+      });
     });
   });
 });

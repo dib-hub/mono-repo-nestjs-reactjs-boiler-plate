@@ -6,3 +6,4 @@ export * from './interfaces/rest-resource';
 export * from './interfaces/jest';
 export * from './interfaces/users';
 export * from './interfaces/auth';
+export * from './interfaces/ui';

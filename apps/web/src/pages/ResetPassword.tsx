@@ -1,4 +1,4 @@
-import { FC, FormEvent, useState } from 'react';
+import { FC, FormEvent, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Button } from '../components/Button';
@@ -11,13 +11,25 @@ export const ResetPassword: FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: FormEvent): void => {
-    e.preventDefault();
-    if (password === confirmPassword) {
-      setSuccess(true);
-      console.log({ password });
-    }
-  };
+  const handleSubmit = useCallback(
+    (e: FormEvent): void => {
+      e.preventDefault();
+      if (password === confirmPassword) {
+        setSuccess(true);
+      }
+    },
+    [password, confirmPassword]
+  );
+
+  const isDisabled = useMemo(
+    () => password !== confirmPassword || !password,
+    [password, confirmPassword]
+  );
+
+  const passwordMismatch = useMemo(
+    () => password !== confirmPassword && !!confirmPassword,
+    [password, confirmPassword]
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
@@ -56,11 +68,9 @@ export const ResetPassword: FC = () => {
                 />
               </div>
 
-              {password !== confirmPassword && confirmPassword && (
-                <p className="text-red-600 text-sm">Passwords do not match</p>
-              )}
+              {passwordMismatch && <p className="text-red-600 text-sm">Passwords do not match</p>}
 
-              <Button type="submit" disabled={password !== confirmPassword || !password}>
+              <Button type="submit" disabled={isDisabled}>
                 Reset password
               </Button>
             </form>

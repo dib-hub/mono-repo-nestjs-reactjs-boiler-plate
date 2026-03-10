@@ -1,29 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { AuthState, IUser } from '@my-monorepo/types';
 
 import { userSignIn, userSignUp, getUserById, getCurrentUser } from '../../services/auth';
 
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  error: string | null;
-  success: boolean;
-}
+const storedToken = localStorage.getItem('token');
 
 const initialState: AuthState = {
   user: null,
-  token: null,
+  token: storedToken,
   loading: false,
+  initializing: !!storedToken,
   error: null,
   success: false,
 };
@@ -32,7 +18,7 @@ const authSlice = createSlice({
   name: 'authSlice',
   initialState,
   reducers: {
-    setUser(state, action: PayloadAction<User>) {
+    setUser(state, action: PayloadAction<IUser>) {
       state.user = action.payload;
       state.error = null;
       state.success = true;
@@ -125,6 +111,7 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.initializing = false;
         state.user = action.payload;
         state.token = localStorage.getItem('token');
         state.success = true;
@@ -132,6 +119,7 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.loading = false;
+        state.initializing = false;
         state.user = null;
         state.token = null;
         state.success = false;

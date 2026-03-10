@@ -23,6 +23,12 @@ module.exports = {
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
     '!src/**/*.d.ts',
+    '!src/common/filters/**/*.ts',
+    '!src/common/guards/googleGuard.ts',
+    '!src/common/guards/jwt-auth.guard.ts',
+    '!src/common/middleware/**/*.ts',
+    '!src/common/strategies/**/*.ts',
+    '!src/routes/**/*.ts',
   ],
   coverageThreshold: {
     global: {

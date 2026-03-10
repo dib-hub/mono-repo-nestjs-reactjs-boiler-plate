@@ -1,4 +1,4 @@
-import { JSX } from 'react';
+import { JSX, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,13 +10,13 @@ const Dashboard = (): JSX.Element => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.authSlice);
 
-  const handleLogout = (): void => {
+  const handleLogout = useCallback((): void => {
     dispatch(logout());
-  };
+  }, [dispatch]);
 
-  const handleProfile = (): void => {
+  const handleProfile = useCallback((): void => {
     navigate('/profile');
-  };
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 p-8">

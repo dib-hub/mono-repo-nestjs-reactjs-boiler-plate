@@ -1,34 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { IAuthResponse, IUser, IUserSignIn, IUserSignUp } from '@my-monorepo/types';
 
 import { authInstance } from '../../apis/initialize.instance';
-
-export interface IUserSignUp {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
-
-export interface IUserSignIn {
-  email: string;
-  password: string;
-}
-
-export interface IUserAuthResponse {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'ADMIN' | 'USER' | 'GUEST';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IAuthResponse {
-  user: IUserAuthResponse;
-  accessToken: string;
-}
 
 export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectValue: string }>(
   'auth/userSignUp',
@@ -46,8 +20,13 @@ export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectV
       }
       throw new Error('No response data received');
     } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        return rejectWithValue(err.response?.data?.message ?? 'Signup failed. Please try again.');
+      if (axios.isAxiosError<{ message?: string | string[] }>(err)) {
+        const data = err.response?.data;
+        const msg = data?.message;
+        if (Array.isArray(msg)) {
+          return rejectWithValue(msg.join(', '));
+        }
+        return rejectWithValue(typeof msg === 'string' ? msg : 'Signup failed. Please try again.');
       }
 
       if (err instanceof Error) {
@@ -59,13 +38,13 @@ export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectV
   }
 );
 
-export const getUserById = createAsyncThunk<IUserAuthResponse, string, { rejectValue: string }>(
+export const getUserById = createAsyncThunk<IUser, string, { rejectValue: string }>(
   'auth/getUserById',
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await authInstance.get(`users/${userId}`);
       if (response && response.data) {
-        return response.data as IUserAuthResponse;
+        return response.data as IUser;
       }
       throw new Error('No response data received');
     } catch (error: unknown) {
@@ -82,13 +61,13 @@ export const getUserById = createAsyncThunk<IUserAuthResponse, string, { rejectV
   }
 );
 
-export const getCurrentUser = createAsyncThunk<IUserAuthResponse, void, { rejectValue: string }>(
+export const getCurrentUser = createAsyncThunk<IUser, void, { rejectValue: string }>(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
       const response = await authInstance.get('me');
       if (response && response.data) {
-        return response.data as IUserAuthResponse;
+        return response.data as IUser;
       }
       throw new Error('No response data received');
     } catch (error: unknown) {
@@ -115,8 +94,13 @@ export const userSignIn = createAsyncThunk<IAuthResponse, IUserSignIn, { rejectV
       }
       throw new Error('No response data received');
     } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        return rejectWithValue(err.response?.data?.message ?? 'Signin failed. Please try again.');
+      if (axios.isAxiosError<{ message?: string | string[] }>(err)) {
+        const data = err.response?.data;
+        const msg = data?.message;
+        if (Array.isArray(msg)) {
+          return rejectWithValue(msg.join(', '));
+        }
+        return rejectWithValue(typeof msg === 'string' ? msg : 'Signin failed. Please try again.');
       }
 
       if (err instanceof Error) {

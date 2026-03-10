@@ -1,17 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { ProfileState } from '@my-monorepo/types';
 
-import { getProfileByUserId, upsertProfile, type IProfileResponse } from '../../services/profile';
+import { getProfileByUserId, upsertProfile } from '../../services/profile';
 import { logout } from './authSlice';
-
-interface ProfileState {
-  profile: IProfileResponse | null;
-  loading: boolean;
-  error: string | null;
-  success: boolean;
-}
 
 const initialState: ProfileState = {
   profile: null,
+  profileUserId: null,
   loading: false,
   error: null,
   success: false,
@@ -29,6 +24,7 @@ const profileSlice = createSlice({
     },
     resetProfileState(state) {
       state.profile = null;
+      state.profileUserId = null;
       state.loading = false;
       state.error = null;
       state.success = false;
@@ -43,11 +39,13 @@ const profileSlice = createSlice({
       .addCase(getProfileByUserId.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload;
+        state.profileUserId = action.payload.userId;
         state.error = null;
       })
       .addCase(getProfileByUserId.rejected, (state, action) => {
         state.loading = false;
         state.profile = null;
+        state.profileUserId = action.meta.arg;
 
         if (action.payload === 'PROFILE_NOT_FOUND') {
           state.error = null;
@@ -66,6 +64,7 @@ const profileSlice = createSlice({
       .addCase(upsertProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload;
+        state.profileUserId = action.payload.userId;
         state.error = null;
         state.success = true;
       })
@@ -76,6 +75,7 @@ const profileSlice = createSlice({
       })
       .addCase(logout, (state) => {
         state.profile = null;
+        state.profileUserId = null;
         state.loading = false;
         state.error = null;
         state.success = false;

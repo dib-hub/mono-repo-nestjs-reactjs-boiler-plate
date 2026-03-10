@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormikErrors, useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { ISignIn, IUserSignIn } from '@my-monorepo/types';
 
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { clearError } from '../redux/slices/authSlice';
 import { AppDispatch, RootState } from '../redux/store';
-import { IUserSignIn, userSignIn } from '../services/auth';
-
-interface SignInForm {
-  email: string;
-  password: string;
-}
+import { userSignIn } from '../services/auth';
 
 export const SignIn: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,8 +26,8 @@ export const SignIn: React.FC = () => {
     }
   }, [success, user, navigate]);
 
-  const validate = (values: SignInForm): FormikErrors<SignInForm> => {
-    const errors: FormikErrors<SignInForm> = {};
+  const validate = useCallback((values: ISignIn): FormikErrors<ISignIn> => {
+    const errors: FormikErrors<ISignIn> = {};
 
     if (!values.email) {
       errors.email = 'Email is required';
@@ -44,7 +40,7 @@ export const SignIn: React.FC = () => {
     }
 
     return errors;
-  };
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -75,7 +71,7 @@ export const SignIn: React.FC = () => {
     },
   });
 
-  const displayError = localError || error;
+  const displayError = useMemo(() => localError || error, [localError, error]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
