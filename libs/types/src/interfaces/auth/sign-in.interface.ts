@@ -8,3 +8,7 @@ export interface ISignUp extends ISignIn {
   lastName: string;
   confirmPassword: string;
 }
+
+export interface IGoogleAuth {
+  idToken: string;
+}

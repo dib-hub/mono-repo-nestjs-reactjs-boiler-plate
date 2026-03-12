@@ -3,12 +3,15 @@ import { FormikErrors, useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ISignIn, IUserSignIn } from '@my-monorepo/types';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { clearError } from '../redux/slices/authSlice';
 import { AppDispatch, RootState } from '../redux/store';
-import { userSignIn } from '../services/auth';
+import { userGoogleSignIn, userSignIn } from '../services/auth';
+
+const googleClientId = import.meta.env['VITE_GOOGLE_CLIENT_ID'] as string;
 
 export const SignIn: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,7 +37,6 @@ export const SignIn: React.FC = () => {
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
       errors.email = 'Invalid email address';
     }
-
     if (!values.password) {
       errors.password = 'Password is required';
     }
@@ -73,6 +75,37 @@ export const SignIn: React.FC = () => {
 
   const displayError = useMemo(() => localError || error, [localError, error]);
 
+  const handleGoogleSuccess = useCallback(
+    async (credentialResponse: CredentialResponse) => {
+      const idToken = credentialResponse.credential;
+
+      if (!idToken) {
+        setLocalError('Google did not return a valid token. Please try again.');
+        return;
+      }
+
+      setLocalError(null);
+      dispatch(clearError());
+
+      try {
+        await dispatch(userGoogleSignIn({ idToken }));
+      } catch (err: unknown) {
+        if (typeof err === 'string') {
+          setLocalError(err);
+        } else if (err instanceof Error) {
+          setLocalError(err.message);
+        } else {
+          setLocalError('Google sign-in failed. Please try again.');
+        }
+      }
+    },
+    [dispatch]
+  );
+
+  const handleGoogleError = useCallback(() => {
+    setLocalError('Google sign-in failed. Please try again.');
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -96,18 +129,31 @@ export const SignIn: React.FC = () => {
           )}
 
           <div className="space-y-3 mb-6">
-            <button
-              className="w-full border border-gray-300 rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
-              disabled={loading}
-            >
-              Log in with Google
-            </button>
-            <button
+            {googleClientId ? (
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  void handleGoogleSuccess(credentialResponse);
+                }}
+                onError={handleGoogleError}
+                text="signin_with"
+                shape="rectangular"
+                width="100%"
+                theme="outline"
+                containerProps={{
+                  style: loading ? { opacity: 0.6, pointerEvents: 'none' } : undefined,
+                }}
+              />
+            ) : (
+              <div className="w-full border border-yellow-300 rounded-lg p-3 text-sm text-yellow-700 bg-yellow-50">
+                Google sign-in is unavailable because `VITE_GOOGLE_CLIENT_ID` is missing.
+              </div>
+            )}
+            {/* <button
               className="w-full border border-gray-300 rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
               disabled={loading}
             >
               Log in with GitHub
-            </button>
+            </button> */}
           </div>
 
           <div className="flex items-center gap-4 mb-6">

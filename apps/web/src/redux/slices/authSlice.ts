@@ -1,7 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, IUser } from '@my-monorepo/types';
 
-import { userSignIn, userSignUp, getUserById, getCurrentUser } from '../../services/auth';
+import {
+  userSignIn,
+  userSignUp,
+  getUserById,
+  getCurrentUser,
+  userGoogleSignIn,
+} from '../../services/auth';
 
 const storedToken = localStorage.getItem('token');
 
@@ -61,6 +67,26 @@ const authSlice = createSlice({
         localStorage.setItem('token', action.payload.accessToken);
       })
       .addCase(userSignIn.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.success = false;
+      });
+
+    builder
+      .addCase(userGoogleSignIn.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(userGoogleSignIn.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.accessToken;
+        state.success = true;
+        state.error = null;
+        localStorage.setItem('token', action.payload.accessToken);
+      })
+      .addCase(userGoogleSignIn.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
         state.success = false;

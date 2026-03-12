@@ -7,3 +7,4 @@ export * from './interfaces/jest';
 export * from './interfaces/users';
 export * from './interfaces/auth';
 export * from './interfaces/ui';
+export * from './interfaces/password-reset';

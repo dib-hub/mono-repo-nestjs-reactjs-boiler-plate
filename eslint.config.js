@@ -36,10 +36,8 @@ module.exports = [
       parser,
       parserOptions: {
         project: [
-          './apps/*/tsconfig.json',
           './apps/*/tsconfig.app.json',
           './apps/*/tsconfig.spec.json',
-          './libs/*/tsconfig.json',
           './libs/*/tsconfig.lib.json',
           './libs/*/tsconfig.spec.json',
         ],
@@ -49,14 +47,9 @@ module.exports = [
     settings: {
       'import/resolver': {
         typescript: {
-          project: [
-            './apps/*/tsconfig.json',
-            './apps/*/tsconfig.app.json',
-            './apps/*/tsconfig.spec.json',
-            './libs/*/tsconfig.json',
-            './libs/*/tsconfig.spec.json',
-          ],
+          project: './tsconfig.base.json',
           alwaysTryTypes: true,
+          noWarnOnMultipleProjects: true,
         },
       },
     },

@@ -27,3 +27,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type Profile = Prisma.ProfileModel
+/**
+ * Model PasswordReset
+ * 
+ */
+export type PasswordReset = Prisma.PasswordResetModel

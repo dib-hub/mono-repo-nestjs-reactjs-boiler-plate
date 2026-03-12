@@ -3,12 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { ISignUp, IUserSignUp } from '@my-monorepo/types';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { userSignUp } from '../services/auth';
+import { userGoogleSignIn, userSignUp } from '../services/auth';
 import { clearError } from '../redux/slices/authSlice';
 import { RootState, AppDispatch } from '../redux/store';
+
+const googleClientId = import.meta.env['VITE_GOOGLE_CLIENT_ID'] as string;
 
 export const SignUp: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,7 +22,6 @@ export const SignUp: React.FC = () => {
   useEffect(() => {
     if (success && user) {
       setLocalError(null);
-      // Redirect to dashboard after successful signup
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -92,10 +94,40 @@ export const SignUp: React.FC = () => {
 
   const displayError = useMemo(() => localError || error, [localError, error]);
 
+  const handleGoogleSuccess = useCallback(
+    async (credentialResponse: CredentialResponse) => {
+      const idToken = credentialResponse.credential;
+
+      if (!idToken) {
+        setLocalError('Google did not return a valid token. Please try again.');
+        return;
+      }
+
+      setLocalError(null);
+      dispatch(clearError());
+
+      try {
+        await dispatch(userGoogleSignIn({ idToken })).unwrap();
+      } catch (err: unknown) {
+        if (typeof err === 'string') {
+          setLocalError(err);
+        } else if (err instanceof Error) {
+          setLocalError(err.message);
+        } else {
+          setLocalError('Google sign-in failed. Please try again.');
+        }
+      }
+    },
+    [dispatch]
+  );
+
+  const handleGoogleError = useCallback(() => {
+    setLocalError('Google sign-in failed. Please try again.');
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-        {/* Left Section */}
         <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-2">DibHub</h1>
@@ -103,39 +135,46 @@ export const SignUp: React.FC = () => {
             <p className="text-gray-600">Join us today and get started.</p>
           </div>
 
-          {/* Success Message */}
           {success && user && (
             <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-              ✓ Signup successful! Redirecting...
+              Signup successful! Redirecting...
             </div>
           )}
 
-          {/* Error Message */}
           {displayError && (
             <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              ✗ {displayError}
+              {displayError}
             </div>
           )}
 
-          {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
-            <button
-              className="w-full border border-gray-300 rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
-              disabled={loading}
-            >
-              <span>🐙</span>
-              Sign up with Google
-            </button>
+            {googleClientId ? (
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  void handleGoogleSuccess(credentialResponse);
+                }}
+                onError={handleGoogleError}
+                text="signup_with"
+                shape="rectangular"
+                width="100%"
+                theme="outline"
+                containerProps={{
+                  style: loading ? { opacity: 0.6, pointerEvents: 'none' } : undefined,
+                }}
+              />
+            ) : (
+              <div className="w-full border border-yellow-300 rounded-lg p-3 text-sm text-yellow-700 bg-yellow-50">
+                Google sign-up is unavailable because `VITE_GOOGLE_CLIENT_ID` is missing.
+              </div>
+            )}
           </div>
 
-          {/* Divider */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-1 border-t border-gray-300"></div>
             <span className="text-gray-500 text-sm">OR</span>
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
-          {/* Form */}
           <form onSubmit={formik.handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -211,13 +250,11 @@ export const SignUp: React.FC = () => {
               )}
             </div>
 
-            {/* Sign Up Button */}
             <Button type="submit" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
 
-          {/* Sign In Link */}
           <div className="text-center mt-6">
             <span className="text-gray-700">Already have an account? </span>
             <Link to="/sign-in" className="text-blue-500 font-semibold hover:underline">
@@ -226,17 +263,9 @@ export const SignUp: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Section - Decorative */}
         <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-12 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="grid grid-cols-3 gap-4">
-              {/* {decorationIndices.map((index) => (
-                <div
-                  key={index}
-                  className="w-20 h-20 rounded-full bg-white opacity-30 shadow-lg"
-                ></div>
-              ))} */}
-            </div>
+            <div className="grid grid-cols-3 gap-4"></div>
           </div>
         </div>
       </div>
