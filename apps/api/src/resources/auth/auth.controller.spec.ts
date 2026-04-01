@@ -1,9 +1,9 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import { IUser, UserRole, NestPassportMockModule } from '@my-monorepo/types';
+import { UserRole, NestPassportMockModule } from '@my-monorepo/types';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, UserDto } from './dto/user.dto';
 
 jest.mock('@my-monorepo/database', () => ({
   UsersService: class {},
@@ -21,10 +21,9 @@ interface AuthServiceMock {
   signup: jest.Mock;
   signIn: jest.Mock;
   getUserById: jest.Mock;
-  me: jest.Mock;
 }
 
-const mockUser: IUser = {
+const mockUser: UserDto = {
   id: '1',
   email: 'test@example.com',
   firstName: 'Test',
@@ -49,7 +48,6 @@ describe('AuthController', () => {
       signup: jest.fn(),
       signIn: jest.fn(),
       getUserById: jest.fn(),
-      me: jest.fn(),
     };
     controller = new AuthController(authService as unknown as AuthService);
   });
@@ -90,12 +88,12 @@ describe('AuthController', () => {
   describe('me', () => {
     it('should return currently authenticated user', async () => {
       const req = { user: { userId: '1', email: 'test@example.com' } };
-      authService.me.mockResolvedValue(mockUser);
+      authService.getUserById.mockResolvedValue(mockUser);
 
       const result = await controller.me(req);
 
       expect(result).toBe(mockUser);
-      expect(authService.me).toHaveBeenCalledWith('1');
+      expect(authService.getUserById).toHaveBeenCalledWith('1');
     });
   });
 
