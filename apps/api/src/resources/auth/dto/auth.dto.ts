@@ -1,7 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import { IUser, UserRole } from '@my-monorepo/types';
-import type { ISignIn } from '@my-monorepo/types/src/interfaces/auth/sign-in.interface';
+import type {
+  IGoogleAuth,
+  ISignIn,
+} from '@my-monorepo/types/src/interfaces/auth/sign-in.interface';
 import type { IUpdateUser } from '@my-monorepo/types/src/interfaces/auth/update-user.interface';
 import type { IAuthResponse } from '@my-monorepo/types/src/interfaces/auth/auth-response.interface';
 
@@ -18,6 +21,15 @@ export class SignInDto implements ISignIn {
   @IsString()
   @MinLength(6)
   password: string;
+}
+
+export class GoogleAuthDto implements IGoogleAuth {
+  @ApiProperty({
+    description: 'Google ID token returned by Google OAuth',
+  })
+  @IsString()
+  @MinLength(1)
+  idToken: string;
 }
 
 export class UpdateUserDto implements IUpdateUser {

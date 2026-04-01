@@ -19,13 +19,13 @@ const NotFound = lazy(() => import('../pages/NotFound'));
 
 function App(): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
-  const { initializing, token } = useSelector((state: RootState) => state.authSlice);
+  const { initializing, token, user } = useSelector((state: RootState) => state.authSlice);
 
   useEffect(() => {
-    if (token) {
+    if (token && !user) {
       void dispatch(getCurrentUser());
     }
-  }, [dispatch, token]);
+  }, [dispatch, token, user]);
 
   if (initializing) {
     return <LoadingScreen />;

@@ -4,6 +4,7 @@ import { UserRole, NestPassportMockModule } from '@my-monorepo/types';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CreateUserDto, UserDto } from './dto/user.dto';
+import { GoogleAuthService } from '../../services/google-auth/google-auth.service';
 
 jest.mock('@my-monorepo/database', () => ({
   UsersService: class {},
@@ -21,6 +22,10 @@ interface AuthServiceMock {
   signup: jest.Mock;
   signIn: jest.Mock;
   getUserById: jest.Mock;
+}
+
+interface GoogleAuthServiceMock {
+  loginWithGoogle: jest.Mock;
 }
 
 const mockUser: UserDto = {
@@ -41,6 +46,7 @@ const mockAuthResponse = {
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthServiceMock;
+  let googleAuthService: GoogleAuthServiceMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -49,7 +55,13 @@ describe('AuthController', () => {
       signIn: jest.fn(),
       getUserById: jest.fn(),
     };
-    controller = new AuthController(authService as unknown as AuthService);
+    googleAuthService = {
+      loginWithGoogle: jest.fn(),
+    };
+    controller = new AuthController(
+      authService as unknown as AuthService,
+      googleAuthService as unknown as GoogleAuthService
+    );
   });
 
   it('should be defined', () => {
@@ -94,6 +106,17 @@ describe('AuthController', () => {
 
       expect(result).toBe(mockUser);
       expect(authService.getUserById).toHaveBeenCalledWith('1');
+    });
+  });
+
+  describe('googleLogin', () => {
+    it('should delegate to googleAuthService.loginWithGoogle', async () => {
+      googleAuthService.loginWithGoogle.mockResolvedValue(mockAuthResponse);
+
+      const result = await controller.googleLogin({ idToken: 'google-id-token' });
+
+      expect(result).toBe(mockAuthResponse);
+      expect(googleAuthService.loginWithGoogle).toHaveBeenCalledWith('google-id-token');
     });
   });
 

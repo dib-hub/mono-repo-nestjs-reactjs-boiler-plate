@@ -1,6 +1,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { IAuthResponse, IUser, IUserSignIn, IUserSignUp } from '@my-monorepo/types';
+import {
+  IAuthResponse,
+  IPasswordResetResponse,
+  IRequestReset,
+  IUser,
+  IUserSignIn,
+  IUserSignUp,
+  IVerifyReset,
+} from '@my-monorepo/types';
 
 import { authInstance } from '../../apis/initialize.instance';
 
@@ -42,7 +50,7 @@ export const getUserById = createAsyncThunk<IUser, string, { rejectValue: string
   'auth/getUserById',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await authInstance.get(`users/${userId}`);
+      const response = await authInstance.get(`${userId}`);
       if (response && response.data) {
         return response.data as IUser;
       }
@@ -111,3 +119,76 @@ export const userSignIn = createAsyncThunk<IAuthResponse, IUserSignIn, { rejectV
     }
   }
 );
+
+export const userGoogleSignIn = createAsyncThunk<
+  IAuthResponse,
+  { idToken: string },
+  { rejectValue: string }
+>('auth/userGoogleSignIn', async ({ idToken }, { rejectWithValue }) => {
+  try {
+    const response = await authInstance.post('google', { idToken });
+    if (response && response.data) {
+      return response.data as IAuthResponse;
+    }
+    throw new Error('No response data received');
+  } catch (err: unknown) {
+    if (axios.isAxiosError<{ message?: string | string[] }>(err)) {
+      const data = err.response?.data;
+      const msg = data?.message;
+      if (Array.isArray(msg)) {
+        return rejectWithValue(msg.join(', '));
+      }
+      return rejectWithValue(
+        typeof msg === 'string' ? msg : 'Google sign-in failed. Please try again.'
+      );
+    }
+
+    if (err instanceof Error) {
+      return rejectWithValue(err.message);
+    }
+
+    return rejectWithValue('Google sign-in failed. Please try again.');
+  }
+});
+
+const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
+  if (axios.isAxiosError<{ message?: string | string[] }>(error)) {
+    const msg = error.response?.data?.message;
+
+    if (Array.isArray(msg)) {
+      return msg.join(', ');
+    }
+
+    if (typeof msg === 'string') {
+      return msg;
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+};
+
+export const requestPasswordReset = async (
+  payload: IRequestReset
+): Promise<IPasswordResetResponse> => {
+  try {
+    const response = await authInstance.post('password-reset/request', payload);
+    return response.data as IPasswordResetResponse;
+  } catch (error: unknown) {
+    throw new Error(getErrorMessage(error, 'Failed to request password reset.'));
+  }
+};
+
+export const verifyPasswordReset = async (
+  payload: IVerifyReset
+): Promise<IPasswordResetResponse> => {
+  try {
+    const response = await authInstance.post('password-reset/verify', payload);
+    return response.data as IPasswordResetResponse;
+  } catch (error: unknown) {
+    throw new Error(getErrorMessage(error, 'Failed to reset password.'));
+  }
+};
