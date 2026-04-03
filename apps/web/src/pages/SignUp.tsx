@@ -4,12 +4,11 @@ import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { ISignUp, IUserSignUp } from '@my-monorepo/types';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { userGoogleSignIn, userSignUp } from '../services/auth';
-import { clearError } from '../redux/slices/authSlice';
-import { RootState, AppDispatch } from '../redux/store';
+import { Input } from '@src/components/Input';
+import { Button } from '@src/components/Button';
+import { userGoogleSignIn, userSignUp } from '@src/services/auth';
+import { clearError } from '@src/redux/slices/authSlice';
+import { RootState, AppDispatch } from '@src/redux/store';
 
 const googleClientId = import.meta.env['VITE_GOOGLE_CLIENT_ID'] as string;
 

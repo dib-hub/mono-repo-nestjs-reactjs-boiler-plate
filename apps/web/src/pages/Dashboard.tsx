@@ -1,9 +1,8 @@
 import { JSX, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-
-import { logout } from '../redux/slices/authSlice';
-import { AppDispatch, RootState } from '../redux/store';
+import { logout } from '@src/redux/slices/authSlice';
+import { AppDispatch, RootState } from '@src/redux/store';
 
 const Dashboard = (): JSX.Element => {
   const dispatch = useDispatch<AppDispatch>();

@@ -1,12 +1,13 @@
+import {
+  IUser,
+  type IAuthResponse,
+  type IGoogleAuth,
+  type ISignIn,
+  type IUpdateUser,
+  UserRole,
+} from '@my-monorepo/types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import { IUser, UserRole } from '@my-monorepo/types';
-import type {
-  IGoogleAuth,
-  ISignIn,
-} from '@my-monorepo/types/src/interfaces/auth/sign-in.interface';
-import type { IUpdateUser } from '@my-monorepo/types/src/interfaces/auth/update-user.interface';
-import type { IAuthResponse } from '@my-monorepo/types/src/interfaces/auth/auth-response.interface';
 
 export class SignInDto implements ISignIn {
   @ApiProperty({

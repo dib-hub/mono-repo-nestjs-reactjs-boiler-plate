@@ -9,8 +9,7 @@ import {
   IUserSignUp,
   IVerifyReset,
 } from '@my-monorepo/types';
-
-import { authInstance } from '../../apis/initialize.instance';
+import { authInstance } from '@src/apis/initialize.instance';
 
 export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectValue: string }>(
   'auth/userSignUp',

@@ -3,9 +3,8 @@ import { UsersService } from '@my-monorepo/database';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@my-monorepo/types';
-
-import { CreateUserDto, UserDto } from './dto/user.dto';
-import { AuthResponseDto } from './dto/auth.dto';
+import { AuthResponseDto } from '@src/resources/auth/dto/auth.dto';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
 
 @Injectable()
 export class AuthService {

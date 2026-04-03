@@ -1,8 +1,7 @@
 import { Body, Controller, ForbiddenException, Get, Param, Put, Req } from '@nestjs/common';
 import { REST_RESOURCE, REST_RESOURCE_ID, type JwtAuthRequest } from '@my-monorepo/types';
-
-import { ProfilesService } from './profiles.service';
-import { ProfileDto, UpsertProfileDto } from './dtos/profile.dto';
+import { ProfilesService } from '@src/resources/profiles/profiles.service';
+import { ProfileDto, UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
 
 @Controller(REST_RESOURCE.PROFILES)
 export class ProfilesController {
@@ -21,7 +20,7 @@ export class ProfilesController {
   ): Promise<ProfileDto> {
     this.assertOwnProfile(req.user.userId, userId);
 
-    return this.profilesService.getProfileByUserId(userId);
+    return await this.profilesService.getProfileByUserId(userId);
   }
 
   @Put(REST_RESOURCE_ID.ID)
@@ -32,6 +31,6 @@ export class ProfilesController {
   ): Promise<ProfileDto> {
     this.assertOwnProfile(req.user.userId, userId);
 
-    return this.profilesService.upsertProfile(userId, dto);
+    return await this.profilesService.upsertProfile(userId, dto);
   }
 }

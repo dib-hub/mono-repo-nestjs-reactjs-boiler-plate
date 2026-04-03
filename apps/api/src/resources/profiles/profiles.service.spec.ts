@@ -5,10 +5,9 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService, ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
-
-import { ProfilesService } from './profiles.service';
-import { UpsertProfileDto } from './dtos/profile.dto';
-import { createTestUser, cleanUpUsers, SeededTestUser } from '../../testUtils';
+import { ProfilesService } from '@src/resources/profiles/profiles.service';
+import { UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
+import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
 
 describe('ProfilesService', () => {
   let module: TestingModule;

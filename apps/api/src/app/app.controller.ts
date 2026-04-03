@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { REST_RESOURCE } from '@my-monorepo/types';
-
-import { AppService } from './app.service';
+import { AppService } from '@src/app/app.service';
 
 @Controller()
 export class AppController {

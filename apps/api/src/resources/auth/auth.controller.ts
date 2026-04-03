@@ -9,13 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { IUser, REST_RESOURCE, REST_RESOURCE_ID, type JwtAuthRequest } from '@my-monorepo/types';
-
-import { AuthService } from './auth.service';
-import { CreateUserDto, UserDto } from './dto/user.dto';
-import { AuthResponseDto, GoogleAuthDto } from './dto/auth.dto';
-import { Public } from '../../common/guards/public.decorator';
-import { LocalAuthGuard } from '../../common/guards/local.guard';
-import { GoogleAuthService } from '../../services/google-auth/google-auth.service';
+import { LocalAuthGuard } from '@src/common/guards/local.guard';
+import { Public } from '@src/common/guards/public.decorator';
+import { AuthService } from '@src/resources/auth/auth.service';
+import { AuthResponseDto, GoogleAuthDto } from '@src/resources/auth/dto/auth.dto';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 
 @Controller(REST_RESOURCE.AUTH)
 export class AuthController {

@@ -1,5 +1,5 @@
-import { SignInDto, UpdateUserDto, UserResponseDto } from './auth.dto';
-import { CreateUserDto } from './user.dto';
+import { SignInDto, UpdateUserDto, UserResponseDto } from '@src/resources/auth/dto/auth.dto';
+import { CreateUserDto } from '@src/resources/auth/dto/user.dto';
 
 describe('DTO classes', () => {
   it('should instantiate CreateUserDto', () => {

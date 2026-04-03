@@ -1,5 +1,5 @@
-import { PasswordResetController } from './password-reset.controller';
-import { PasswordResetService } from './password-reset.service';
+import { PasswordResetController } from '@src/services/password-reset/password-reset.controller';
+import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 
 type PasswordResetServiceMock = {
   requestReset: jest.Mock;

@@ -13,6 +13,7 @@ module.exports = composePlugins(withNx(), (config) => {
   // Resolve workspace lib path aliases so webpack can bundle them
   config.resolve.alias = {
     ...config.resolve.alias,
+    '@src': path.resolve(__dirname, 'src'),
     '@my-monorepo/database': path.resolve(__dirname, '../../libs/repository/src/index.ts'),
     '@my-monorepo/types': path.resolve(__dirname, '../../libs/types/src/index.ts'),
   };

@@ -10,7 +10,7 @@ jest.mock('googleapis', () => ({
 import { InternalServerErrorException } from '@nestjs/common';
 import { google } from 'googleapis';
 
-import { GmailService } from './gmail.service';
+import { GmailService } from '@src/services/gmail/gmail.service';
 
 describe('GmailService', () => {
   let service: GmailService;

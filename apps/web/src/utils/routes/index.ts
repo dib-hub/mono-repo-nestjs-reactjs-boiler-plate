@@ -1,4 +1,4 @@
-import { AuthRoute, ProtectedRoute, PublicRoute } from '../../interfaces/routes';
+import { AuthRoute, ProtectedRoute, PublicRoute } from '@src/interfaces/routes';
 
 const AUTH_ROUTES: AuthRoute = {
   login: '/signin',

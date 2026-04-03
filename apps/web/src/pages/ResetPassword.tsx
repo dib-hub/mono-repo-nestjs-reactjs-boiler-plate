@@ -1,9 +1,8 @@
 import { FC, FormEvent, useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import { verifyPasswordReset } from '../services/auth';
+import { Button } from '@src/components/Button';
+import { Input } from '@src/components/Input';
+import { verifyPasswordReset } from '@src/services/auth';
 
 const decorationIndices = Array.from({ length: 9 }, (_, i) => i);
 

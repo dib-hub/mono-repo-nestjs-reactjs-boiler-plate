@@ -10,7 +10,7 @@
     "dev": "concurrently --names api,web --prefix-colors blue,green \"pnpm run start:api\" \"pnpm run start:web\"",
     "build": "nx run-many --target=build --all",
     "test": "nx run-many --target=test --all",
-    "test:cov": "nx run api:test --coverage --coverageReporters=text --coverageReporters=lcov",
+    "test:cov": "node scripts/test-cov.cjs",
     "test:db:up": "docker compose -f docker-compose.test.yml up -d --wait",
     "test:db:down": "docker compose -f docker-compose.test.yml down -v",
     "test:migrate": "dotenv -e .env.test -- pnpm -C libs/repository exec prisma migrate deploy",

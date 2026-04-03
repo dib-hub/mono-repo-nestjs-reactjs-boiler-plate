@@ -1,8 +1,7 @@
 import { lazy } from 'react';
-
-import { ROUTES } from '../utils/routes';
-const Dashboard = lazy(() => import('../pages/Dashboard'));
-const ProfilePage = lazy(() => import('../pages/Profile'));
+import { ROUTES } from '@src/utils/routes';
+const Dashboard = lazy(() => import('@src/pages/Dashboard'));
+const ProfilePage = lazy(() => import('@src/pages/Profile'));
 
 export const PROTECTED_ROUTES = [
   {

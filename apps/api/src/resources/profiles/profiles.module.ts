@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ProfilesModule as ProfilesRepoModule } from '@my-monorepo/database';
-
-import { ProfilesController } from './profiles.controller';
-import { ProfilesService } from './profiles.service';
+import { ProfilesController } from '@src/resources/profiles/profiles.controller';
+import { ProfilesService } from '@src/resources/profiles/profiles.service';
 
 @Module({
   imports: [ProfilesRepoModule],

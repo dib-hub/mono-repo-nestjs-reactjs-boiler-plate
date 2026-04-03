@@ -13,9 +13,8 @@ import { InternalServerErrorException, UnauthorizedException } from '@nestjs/com
 import { PrismaService } from '@my-monorepo/database';
 import { OAuth2Client } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
-
-import { GoogleAuthService } from './google-auth.service';
-import { createTestUser, cleanUpUsers } from '../../testUtils';
+import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
+import { cleanUpUsers, createTestUser } from '@src/testUtils';
 
 describe('GoogleAuthService', () => {
   let module: TestingModule;

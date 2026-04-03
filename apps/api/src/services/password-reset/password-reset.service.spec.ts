@@ -7,15 +7,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '@my-monorepo/database';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-
-import { GmailService } from '../gmail/gmail.service';
-import { PasswordResetService } from './password-reset.service';
+import { GmailService } from '@src/services/gmail/gmail.service';
+import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 import {
-  createTestUser,
-  cleanUpUsers,
   cleanUpPasswordResets,
+  cleanUpUsers,
+  createTestUser,
   SeededTestUser,
-} from '../../testUtils';
+} from '@src/testUtils';
 
 describe('PasswordResetService', () => {
   let module: TestingModule;

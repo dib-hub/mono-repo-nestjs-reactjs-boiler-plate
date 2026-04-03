@@ -3,11 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-
-import './styles/globals.css';
-
-import { store } from './redux/store';
-import App from './app/App';
+import '@src/styles/globals.css';
+import { store } from '@src/redux/store';
+import App from '@src/app/App';
 
 const googleClientId = import.meta.env['VITE_GOOGLE_CLIENT_ID'] as string;
 

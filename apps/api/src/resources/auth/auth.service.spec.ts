@@ -8,10 +8,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
-
-import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/user.dto';
-import { createTestUser, cleanUpUsers, SeededTestUser } from '../../testUtils';
+import { AuthService } from '@src/resources/auth/auth.service';
+import { CreateUserDto } from '@src/resources/auth/dto/user.dto';
+import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
 
 describe('AuthService', () => {
   let module: TestingModule;

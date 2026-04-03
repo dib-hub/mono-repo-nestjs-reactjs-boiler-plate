@@ -1,13 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, IUser } from '@my-monorepo/types';
-
 import {
   userSignIn,
   userSignUp,
   getUserById,
   getCurrentUser,
   userGoogleSignIn,
-} from '../../services/auth';
+} from '@src/services/auth';
 
 const storedToken = localStorage.getItem('token');
 

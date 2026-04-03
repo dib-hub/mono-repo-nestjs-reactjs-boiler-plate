@@ -9,12 +9,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
-
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { GoogleAuthService } from '../../services/google-auth/google-auth.service';
-import { CreateUserDto } from './dto/user.dto';
-import { createTestUser, cleanUpUsers, SeededTestUser } from '../../testUtils';
+import { AuthController } from '@src/resources/auth/auth.controller';
+import { AuthService } from '@src/resources/auth/auth.service';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
+import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
 
 describe('AuthController', () => {
   let module: TestingModule;

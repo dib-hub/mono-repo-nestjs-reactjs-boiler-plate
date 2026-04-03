@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
-
-import { ProfileDto, UpsertProfileDto } from './dtos/profile.dto';
+import { ProfileDto, UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
 
 @Injectable()
 export class ProfilesService {

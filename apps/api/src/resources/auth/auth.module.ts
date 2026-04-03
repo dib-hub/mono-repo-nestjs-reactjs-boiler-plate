@@ -3,15 +3,14 @@ import { PrismaService, UsersModule } from '@my-monorepo/database';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { JwtStrategy } from '../../common/strategies/jwt-strategy';
-import { LocalStrategy } from '../../common/strategies/local.strategy';
-import { GoogleAuthService } from '../../services/google-auth/google-auth.service';
-import { GmailService } from '../../services/gmail/gmail.service';
-import { PasswordResetController } from '../../services/password-reset/password-reset.controller';
-import { PasswordResetService } from '../../services/password-reset/password-reset.service';
+import { JwtStrategy } from '@src/common/strategies/jwt-strategy';
+import { LocalStrategy } from '@src/common/strategies/local.strategy';
+import { AuthController } from '@src/resources/auth/auth.controller';
+import { AuthService } from '@src/resources/auth/auth.service';
+import { GmailService } from '@src/services/gmail/gmail.service';
+import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
+import { PasswordResetController } from '@src/services/password-reset/password-reset.controller';
+import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 
 @Module({
   imports: [

@@ -27,6 +27,11 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "typeRoots": ["../../node_modules/@types"],
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@my-monorepo/database": ["../../libs/repository/src/index.ts"],
+      "@my-monorepo/types": ["../../libs/types/src/index.ts"]
+    }
   }
 }

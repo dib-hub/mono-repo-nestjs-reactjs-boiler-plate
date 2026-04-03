@@ -1,9 +1,8 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-
-import { ROUTES } from '../utils/routes';
-import SignIn from '../pages/SignIn';
-import HomePage from '../pages/HomePage';
+import { ROUTES } from '@src/utils/routes';
+import SignIn from '@src/pages/SignIn';
+import HomePage from '@src/pages/HomePage';
 
 const PublicRoutes: React.FC = () => (
   <Routes>

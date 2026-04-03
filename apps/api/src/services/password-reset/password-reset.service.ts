@@ -7,8 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-
-import { GmailService } from '../gmail/gmail.service';
+import { GmailService } from '@src/services/gmail/gmail.service';
 
 @Injectable()
 export class PasswordResetService {

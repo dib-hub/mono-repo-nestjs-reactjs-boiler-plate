@@ -4,12 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ISignIn, IUserSignIn } from '@my-monorepo/types';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import { clearError } from '../redux/slices/authSlice';
-import { AppDispatch, RootState } from '../redux/store';
-import { userGoogleSignIn, userSignIn } from '../services/auth';
+import { Button } from '@src/components/Button';
+import { Input } from '@src/components/Input';
+import { clearError } from '@src/redux/slices/authSlice';
+import { AppDispatch, RootState } from '@src/redux/store';
+import { userGoogleSignIn, userSignIn } from '@src/services/auth';
 
 const googleClientId = import.meta.env['VITE_GOOGLE_CLIENT_ID'] as string;
 

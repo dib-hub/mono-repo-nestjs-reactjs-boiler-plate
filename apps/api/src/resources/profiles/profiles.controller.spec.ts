@@ -8,11 +8,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException } from '@nestjs/common';
 import { PrismaService, ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
-
-import { ProfilesController } from './profiles.controller';
-import { ProfilesService } from './profiles.service';
-import { UpsertProfileDto } from './dtos/profile.dto';
-import { createTestUser, cleanUpUsers, SeededTestUser } from '../../testUtils';
+import { ProfilesController } from '@src/resources/profiles/profiles.controller';
+import { ProfilesService } from '@src/resources/profiles/profiles.service';
+import { UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
+import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
 
 describe('ProfilesController', () => {
   let module: TestingModule;

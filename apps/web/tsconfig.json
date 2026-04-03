@@ -13,6 +13,12 @@
   "compilerOptions": {
     "target": "ES2020",
     "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"],
+      "@my-monorepo/database": ["../../libs/repository/src/index.ts"],
+      "@my-monorepo/types": ["../../libs/types/src/index.ts"]
+    },
     "useDefineForClassFields": false,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

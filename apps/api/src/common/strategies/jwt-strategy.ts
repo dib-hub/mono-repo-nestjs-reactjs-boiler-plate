@@ -1,4 +1,4 @@
-import type { JWTUser } from '@my-monorepo/types';
+import { JwtPayload, type JWTUser } from '@my-monorepo/types';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -13,10 +13,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: JWTUser): JWTUser {
+  validate(payload: JwtPayload): JWTUser {
     if (!payload.sub || !payload.email) {
       throw new Error('Invalid token payload');
     }
+
     return {
       userId: payload.sub,
       email: payload.email,

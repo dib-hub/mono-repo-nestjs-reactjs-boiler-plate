@@ -13,7 +13,7 @@ export default {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@src/(.*)$': '<rootDir>/src/$1',
   },
   coverageDirectory: '../../coverage/apps/web',
 };

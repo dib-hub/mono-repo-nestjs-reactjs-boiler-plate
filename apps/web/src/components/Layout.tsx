@@ -1,9 +1,8 @@
 import { ReactNode, JSX } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-
-import { AppDispatch, RootState } from '../redux/store';
-import { logout } from '../redux/slices/authSlice';
+import { AppDispatch, RootState } from '@src/redux/store';
+import { logout } from '@src/redux/slices/authSlice';
 
 interface LayoutProps {
   children: ReactNode;

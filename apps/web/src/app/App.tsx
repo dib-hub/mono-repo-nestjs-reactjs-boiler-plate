@@ -1,21 +1,20 @@
 import { JSX, lazy, Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '@src/redux/store';
+import Layout from '@src/components/Layout';
+import LoadingScreen from '@src/components/LoadingScreen';
+import { ErrorBoundary } from '@src/components/ErrorBoundary';
+import { ProtectedRoute } from '@src/routes/ProtectedRoute';
+import { PROTECTED_ROUTES } from '@src/routes/routes';
+import { getCurrentUser } from '@src/services/auth';
 
-import type { AppDispatch, RootState } from '../redux/store';
-import Layout from '../components/Layout';
-import LoadingScreen from '../components/LoadingScreen';
-import { ErrorBoundary } from '../components/ErrorBoundary';
-import { ProtectedRoute } from '../routes/ProtectedRoute';
-import { PROTECTED_ROUTES } from '../routes/routes';
-import { getCurrentUser } from '../services/auth';
-
-const HomePage = lazy(() => import('../pages/HomePage'));
-const SignIn = lazy(() => import('../pages/SignIn'));
-const SignUp = lazy(() => import('../pages/SignUp'));
-const ResetPassword = lazy(() => import('../pages/ResetPassword'));
-const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
-const NotFound = lazy(() => import('../pages/NotFound'));
+const HomePage = lazy(() => import('@src/pages/HomePage'));
+const SignIn = lazy(() => import('@src/pages/SignIn'));
+const SignUp = lazy(() => import('@src/pages/SignUp'));
+const ResetPassword = lazy(() => import('@src/pages/ResetPassword'));
+const ForgotPassword = lazy(() => import('@src/pages/ForgotPassword'));
+const NotFound = lazy(() => import('@src/pages/NotFound'));
 
 function App(): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();

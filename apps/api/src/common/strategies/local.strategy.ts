@@ -1,25 +1,24 @@
-import { Strategy } from 'passport-local';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { IUser } from '@my-monorepo/types';
-
-import { AuthService } from '../../resources/auth/auth.service';
+import { PassportStrategy } from '@nestjs/passport';
+import { type UserDto } from '@src/resources/auth/dto/user.dto';
+import { AuthService } from '@src/resources/auth/auth.service';
+import { Strategy } from 'passport-local';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
-  constructor(private authService: AuthService) {
+  constructor(private readonly authService: AuthService) {
     super({
-      usernameField: 'email', // change if using email instead of username
+      usernameField: 'email',
     });
   }
 
-  async validate(email: string, password: string): Promise<IUser> {
+  async validate(email: string, password: string): Promise<UserDto> {
     const user = await this.authService.validateUser(email, password);
 
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    return user as IUser;
+    return user;
   }
 }

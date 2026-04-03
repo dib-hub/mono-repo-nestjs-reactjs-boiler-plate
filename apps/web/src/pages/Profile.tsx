@@ -1,10 +1,9 @@
 import { JSX, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IProfileFormData, IUpsertProfile } from '@my-monorepo/types';
-
-import { clearProfileError, clearProfileSuccess } from '../redux/slices/profileSlice';
-import type { AppDispatch, RootState } from '../redux/store';
-import { getProfileByUserId, upsertProfile } from '../services/profile';
+import { clearProfileError, clearProfileSuccess } from '@src/redux/slices/profileSlice';
+import type { AppDispatch, RootState } from '@src/redux/store';
+import { getProfileByUserId, upsertProfile } from '@src/services/profile';
 
 const buildProfileFormDataFromUser = (user: RootState['authSlice']['user']): IProfileFormData => ({
   name: user ? `${user.firstName} ${user.lastName}`.trim() : '',
