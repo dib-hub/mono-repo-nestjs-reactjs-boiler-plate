@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   displayName: 'root',
   projects: [
     '<rootDir>/apps/api',

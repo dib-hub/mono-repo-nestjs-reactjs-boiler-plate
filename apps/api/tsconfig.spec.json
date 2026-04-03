@@ -4,6 +4,8 @@
     "outDir": "../../dist/out-tsc/apps/api",
     "module": "commonjs",
     "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "types": ["jest", "node"],
     "typeRoots": ["../../node_modules/@types"]
   },

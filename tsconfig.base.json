@@ -4,20 +4,21 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
     "importHelpers": true,
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2020", "DOM"],
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
     "typeRoots": ["./node_modules/@types"],
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
     "paths": {
-      "@my-monorepo/database": ["libs/repository/src/index.ts"],
-      "@my-monorepo/types": ["libs/types/src/index.ts"]
+      "@my-monorepo/database": ["./libs/repository/src/index.ts"],
+      "@my-monorepo/types": ["./libs/types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -4,5 +4,12 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["eslint.config.js"]
+  "include": [
+    "eslint.config.js",
+    "jest.config.ts",
+    "jest-prisma-runtime-mock.js",
+    "jest-prisma-transform.js",
+    "jest.preset.js",
+    "jest.setup.js"
+  ]
 }

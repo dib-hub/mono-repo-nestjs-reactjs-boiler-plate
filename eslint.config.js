@@ -36,6 +36,7 @@ module.exports = [
       parser,
       parserOptions: {
         project: [
+          './tsconfig.eslint.json',
           './apps/*/tsconfig.app.json',
           './apps/*/tsconfig.spec.json',
           './libs/*/tsconfig.lib.json',
