@@ -3,38 +3,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-// Prevent Jest from loading the Prisma ESM client (incompatible with CJS test runner)
-jest.mock('@my-monorepo/database', () => ({
-  UsersModule: class UsersModule {},
-  UsersService: class UsersService {
-    findAll = jest.fn();
-  },
-  PrismaService: class PrismaService {},
-  DatabaseModule: class DatabaseModule {},
-}));
-
 describe('AppController', () => {
   let controller: AppController;
-  let appService: jest.Mocked<AppService>;
+  let appService: AppService;
 
   beforeEach(async () => {
-    const mockAppService: Partial<jest.Mocked<AppService>> = {
-      getData: jest.fn(),
-      getHealth: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [
-        {
-          provide: AppService,
-          useValue: mockAppService,
-        },
-      ],
+      providers: [AppService],
     }).compile();
 
     controller = module.get<AppController>(AppController);
-    appService = module.get(AppService);
+    appService = module.get<AppService>(AppService);
   });
 
   it('should be defined', () => {
@@ -42,28 +22,20 @@ describe('AppController', () => {
   });
 
   describe('getData', () => {
-    it('should return data from AppService', () => {
-      const mockData = { message: 'Welcome to the API!', timestamp: new Date() };
-      appService.getData.mockReturnValue(mockData);
+    it('should return a welcome message and a timestamp from the real AppService', () => {
+      const result = controller.getData();
 
-      expect(controller.getData()).toEqual(mockData);
-      expect(appService.getData).toHaveBeenCalledTimes(1);
+      expect(result.message).toBe('Welcome to the API!');
+      expect(result.timestamp).toBeInstanceOf(Date);
     });
   });
 
   describe('getHealth', () => {
-    it('should return health status from AppService', () => {
-      const mockHealth = { status: 'ok', uptime: 42 };
-      appService.getHealth.mockReturnValue(mockHealth);
-
-      expect(controller.getHealth()).toEqual(mockHealth);
-      expect(appService.getHealth).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return status ok', () => {
-      appService.getHealth.mockReturnValue({ status: 'ok', uptime: 10 });
+    it('should return status ok with a numeric uptime from the real AppService', () => {
       const result = controller.getHealth();
+
       expect(result.status).toBe('ok');
+      expect(typeof result.uptime).toBe('number');
     });
   });
 });

@@ -6,8 +6,9 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/lib/generated/client"
+  provider     = "prisma-client"
+  output       = "../src/lib/generated/client"
+  moduleFormat = "cjs"
 }
 
 // User model

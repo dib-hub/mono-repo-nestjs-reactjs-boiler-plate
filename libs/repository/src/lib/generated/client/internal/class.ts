@@ -12,7 +12,7 @@
  */
 
 import * as runtime from "@prisma/client/runtime/client"
-import type * as Prisma from "./prismaNamespace.js"
+import type * as Prisma from "./prismaNamespace"
 
 
 const config: runtime.GetPrismaClientConfig = {
@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.4.1",
   "engineVersion": "55ae170b1ced7fc6ed07a15f110549408c501bb3",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/lib/generated/client\"\n}\n\n// User model\nmodel User {\n  id        String       @id @default(uuid())\n  email     String       @unique\n  firstName String\n  lastName  String\n  password  String\n  role      UserRole     @default(USER)\n  googleId  String?      @unique\n  avatar    String?\n  provider  AuthProvider @default(LOCAL)\n  createdAt DateTime     @default(now())\n  updatedAt DateTime     @updatedAt\n  profile   Profile?\n\n  @@map(\"users\")\n}\n\n// Profile model\nmodel Profile {\n  id          String   @id @default(uuid())\n  name        String\n  email       String\n  linkedInUrl String?\n  githubUrl   String?\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n  userId      String   @unique\n  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"profiles\")\n}\n\nmodel PasswordReset {\n  id        String   @id @default(uuid())\n  email     String   @unique\n  otp       String\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n}\n\nenum UserRole {\n  ADMIN\n  USER\n  GUEST\n}\n\nenum AuthProvider {\n  LOCAL\n  GOOGLE\n}\n",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\ngenerator client {\n  provider     = \"prisma-client\"\n  output       = \"../src/lib/generated/client\"\n  moduleFormat = \"cjs\"\n}\n\n// User model\nmodel User {\n  id        String       @id @default(uuid())\n  email     String       @unique\n  firstName String\n  lastName  String\n  password  String\n  role      UserRole     @default(USER)\n  googleId  String?      @unique\n  avatar    String?\n  provider  AuthProvider @default(LOCAL)\n  createdAt DateTime     @default(now())\n  updatedAt DateTime     @updatedAt\n  profile   Profile?\n\n  @@map(\"users\")\n}\n\n// Profile model\nmodel Profile {\n  id          String   @id @default(uuid())\n  name        String\n  email       String\n  linkedInUrl String?\n  githubUrl   String?\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n  userId      String   @unique\n  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"profiles\")\n}\n\nmodel PasswordReset {\n  id        String   @id @default(uuid())\n  email     String   @unique\n  otp       String\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n}\n\nenum UserRole {\n  ADMIN\n  USER\n  GUEST\n}\n\nenum AuthProvider {\n  LOCAL\n  GOOGLE\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -45,10 +45,10 @@ async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Modul
 }
 
 config.compilerWasm = {
-  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.mjs"),
+  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.js"),
 
   getQueryCompilerWasmModule: async () => {
-    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.mjs")
+    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.js")
     return await decodeBase64AsWasm(wasm)
   },
 

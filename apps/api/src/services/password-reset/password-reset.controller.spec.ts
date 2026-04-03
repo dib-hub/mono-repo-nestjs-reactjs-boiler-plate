@@ -1,7 +1,3 @@
-jest.mock('@my-monorepo/database', () => ({
-  PrismaService: class {},
-}));
-
 import { PasswordResetController } from './password-reset.controller';
 import { PasswordResetService } from './password-reset.service';
 

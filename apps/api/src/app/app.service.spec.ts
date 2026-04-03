@@ -1,33 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from '@my-monorepo/database';
 
 import { AppService } from './app.service';
 
-// Prevent Jest loading the Prisma ESM client
-jest.mock('@my-monorepo/database', () => ({
-  UsersModule: class UsersModule {},
-  UsersService: class UsersService {
-    findAll = jest.fn();
-  },
-  PrismaService: class PrismaService {},
-  DatabaseModule: class DatabaseModule {},
-}));
-
 describe('AppService', () => {
   let service: AppService;
-  let usersService: { findAll: jest.Mock };
 
   beforeEach(async () => {
-    usersService = { findAll: jest.fn() };
-
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AppService,
-        {
-          provide: UsersService,
-          useValue: usersService,
-        },
-      ],
+      providers: [AppService],
     }).compile();
 
     service = module.get<AppService>(AppService);

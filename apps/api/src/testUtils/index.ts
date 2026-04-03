@@ -1,16 +1,23 @@
-import { randomUUID } from 'crypto';
-import { resolve } from 'path';
+/**
+ * Test utilities — seed helpers and cleanup routines for integration tests.
+ * All functions receive a live PrismaService instance so they run against
+ * whatever DATABASE_URL is currently set (the test container when NODE_ENV=test).
+ */
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@my-monorepo/database';
-import { config as loadEnv } from 'dotenv';
 
-interface SeededTestUser {
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export interface SeededTestUser {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
+  /** The raw plain-text password that was hashed before insertion. */
+  plainPassword: string;
 }
 
-interface SeededTestProfile {
+export interface SeededTestProfile {
   id: string;
   name: string;
   email: string;
@@ -19,72 +26,93 @@ interface SeededTestProfile {
   userId: string;
 }
 
-interface TestProfileSeed {
-  user: SeededTestUser;
-  profile: SeededTestProfile;
-}
+// ─── Constants ───────────────────────────────────────────────────────────────
 
-export function loadTestDatabaseEnv(): void {
-  loadEnv({ path: resolve(process.cwd(), '.env') });
-  loadEnv({ path: resolve(process.cwd(), 'apps/api/.env') });
-  loadEnv({ path: resolve(process.cwd(), 'libs/repository/.env') });
+/** Re-used across tests that need to call signIn/validateUser. */
+export const TEST_USER_PASSWORD = 'Integration1234!';
 
-  const testDatabaseUrl = process.env['TEST_DATABASE_URL'];
+// ─── Seed helpers ────────────────────────────────────────────────────────────
 
-  if (!testDatabaseUrl) {
-    throw new Error('TEST_DATABASE_URL must be set for DB-backed module tests');
-  }
+/**
+ * Create a user in the DB.  Password is bcrypt-hashed before insertion.
+ * Returns the created row plus the original plain-text password so tests
+ * can call signIn without re-hashing.
+ */
+export async function createTestUser(
+  prisma: PrismaService,
+  overrides: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    password?: string;
+    role?: 'USER' | 'ADMIN' | 'GUEST';
+  } = {}
+): Promise<SeededTestUser> {
+  const plainPassword = overrides.password ?? TEST_USER_PASSWORD;
+  const hashed = await bcrypt.hash(plainPassword, 10);
+  const suffix = Date.now();
 
-  process.env['DATABASE_URL'] = testDatabaseUrl;
-}
-
-export async function createTestUser(prisma: PrismaService): Promise<SeededTestUser> {
-  const suffix = randomUUID();
-  const email = `controller-test-${suffix}@example.com`;
-
-  return await prisma.user.create({
+  const created = await prisma.user.create({
     data: {
-      email,
-      firstName: 'Controller',
-      lastName: 'Test',
-      password: 'plain-text-for-tests-only',
-      role: 'USER',
+      email: overrides.email ?? `test_${suffix}@example.com`,
+      firstName: overrides.firstName ?? 'Test',
+      lastName: overrides.lastName ?? 'User',
+      password: hashed,
+      role: overrides.role ?? 'USER',
     },
-    select: {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-    },
+    select: { id: true, email: true, firstName: true, lastName: true },
   });
+
+  return { ...created, plainPassword };
 }
 
-export async function createTestProfile(prisma: PrismaService): Promise<TestProfileSeed> {
-  const user = await createTestUser(prisma);
+/**
+ * Create a profile row linked to an existing user.
+ */
+export async function createTestProfile(
+  prisma: PrismaService,
+  userId: string,
+  overrides: {
+    name?: string;
+    email?: string;
+    linkedInUrl?: string | null;
+    githubUrl?: string | null;
+  } = {}
+): Promise<SeededTestProfile> {
+  const suffix = Date.now();
 
-  const profile = await prisma.profile.create({
+  return prisma.profile.create({
     data: {
-      name: 'Controller Test Profile',
-      email: user.email,
-      linkedInUrl: 'https://linkedin.com/in/controller-test-profile',
-      githubUrl: 'https://github.com/controller-test-profile',
-      userId: user.id,
+      userId,
+      name: overrides.name ?? 'Test Profile',
+      email: overrides.email ?? `profile_${suffix}@example.com`,
+      linkedInUrl: overrides.linkedInUrl ?? null,
+      githubUrl: overrides.githubUrl ?? null,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      linkedInUrl: true,
-      githubUrl: true,
-      userId: true,
-    },
-  });
-
-  return { user, profile };
+    select: { id: true, name: true, email: true, linkedInUrl: true, githubUrl: true, userId: true },
+  }) as Promise<SeededTestProfile>;
 }
 
-export async function cleanupTestUser(prisma: PrismaService, userId: string): Promise<void> {
-  await prisma.user.deleteMany({
-    where: { id: userId },
-  });
+// ─── Cleanup helpers ─────────────────────────────────────────────────────────
+
+/** Delete profiles then users (cascade-safe order). */
+export async function cleanUpUsers(prisma: PrismaService, userIds: string[]): Promise<void> {
+  if (userIds.length === 0) return;
+  await prisma.profile.deleteMany({ where: { userId: { in: userIds } } });
+  await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+}
+
+/** Delete profiles only (leave the associated users). */
+export async function cleanUpProfiles(prisma: PrismaService, userIds: string[]): Promise<void> {
+  if (userIds.length === 0) return;
+  await prisma.profile.deleteMany({ where: { userId: { in: userIds } } });
+}
+
+/** Delete password-reset rows by email. */
+export async function cleanUpPasswordResets(
+  prisma: PrismaService,
+  emails: string[]
+): Promise<void> {
+  if (emails.length === 0) return;
+  await prisma.passwordReset.deleteMany({ where: { email: { in: emails } } });
 }

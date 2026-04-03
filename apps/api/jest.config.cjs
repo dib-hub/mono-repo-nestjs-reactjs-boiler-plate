@@ -2,8 +2,9 @@ module.exports = {
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
+  setupFiles: ['<rootDir>/jest.setup.ts'],
   transform: {
-    '^.+\\.[tj]sx?$': [
+    '^.+\.[tj]sx?$': [
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
@@ -14,6 +15,7 @@ module.exports = {
   moduleNameMapper: {
     '^@my-monorepo/database$': '<rootDir>/../../libs/repository/src/index.ts',
     '^@my-monorepo/types$': '<rootDir>/../../libs/types/src/index.ts',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   coverageDirectory: '../../coverage/apps/api',
   collectCoverageFrom: [

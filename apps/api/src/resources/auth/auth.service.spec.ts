@@ -1,161 +1,164 @@
-// ensure database package (which pulls in Prisma) is mocked before loading AuthService
-jest.mock('@my-monorepo/database', () => ({
-  UsersService: class {},
-}));
-jest.mock('bcrypt', () => ({
-  hash: jest.fn(),
-  compare: jest.fn(),
-}));
-
+/**
+ * AuthService — integration tests
+ *
+ * Uses real PrismaService + UsersService against the Docker test database.
+ * Only JwtService is mocked (no real signing needed).
+ */
+import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { UserRole } from '@my-monorepo/types';
-import { UsersService } from '@my-monorepo/database';
-import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { PrismaService, UsersService } from '@my-monorepo/database';
 
 import { AuthService } from './auth.service';
-import { CreateUserDto, UserDto } from './dto/user.dto';
-
-type UsersServiceMock = Partial<UsersService> & {
-  create: jest.Mock;
-  findByEmail: jest.Mock;
-  findById: jest.Mock;
-};
-
-const mockUsersService: UsersServiceMock = {
-  create: jest.fn(),
-  findByEmail: jest.fn(),
-  findById: jest.fn(),
-};
-
-const mockJwtService = {
-  sign: jest.fn().mockReturnValue('mock_token'),
-  verify: jest.fn(),
-};
-
-const mockedBcrypt = bcrypt as unknown as { compare: jest.Mock; hash: jest.Mock };
-
-type UserWithPassword = UserDto & { password: string };
-
-const mockUser: UserDto = {
-  id: '1',
-  email: 'a@a.com',
-  firstName: 'A',
-  lastName: 'B',
-  role: UserRole.USER,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-const mockUserWithPassword: UserWithPassword = {
-  ...mockUser,
-  password: 'hashed',
-};
+import { CreateUserDto } from './dto/user.dto';
+import { createTestUser, cleanUpUsers, SeededTestUser } from '../../testUtils';
 
 describe('AuthService', () => {
+  let module: TestingModule;
   let service: AuthService;
+  let prisma: PrismaService;
+  let seededUser: SeededTestUser;
+  const userIdsToClean: string[] = [];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (mockJwtService.sign as jest.Mock).mockReturnValue('mock_token');
-    service = new AuthService(mockUsersService as unknown as UsersService, mockJwtService as any);
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        UsersService,
+        PrismaService,
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn().mockReturnValue('mock-jwt-token') },
+        },
+      ],
+    }).compile();
+
+    service = module.get<AuthService>(AuthService);
+    prisma = module.get<PrismaService>(PrismaService);
+    await prisma.onModuleInit();
+
+    seededUser = await createTestUser(prisma, {
+      email: 'auth-svc-test@example.com',
+    });
+    userIdsToClean.push(seededUser.id);
   });
 
-  it('validateUser should return sanitized user when credentials are valid', async () => {
-    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
-    mockedBcrypt.compare.mockResolvedValue(true);
-
-    await expect(service.validateUser('a@a.com', 'password')).resolves.toEqual(mockUser);
-    expect(mockUsersService.findByEmail).toHaveBeenCalledWith('a@a.com');
-    expect(mockedBcrypt.compare).toHaveBeenCalledWith('password', 'hashed');
+  afterAll(async () => {
+    await cleanUpUsers(prisma, userIdsToClean);
+    await prisma.onModuleDestroy();
+    await module.close();
   });
 
-  it('validateUser should return null when user not found', async () => {
-    mockUsersService.findByEmail.mockResolvedValue(null);
-
-    await expect(service.validateUser('a@a.com', 'pw')).resolves.toBeNull();
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
-  it('validateUser should return null when password does not match', async () => {
-    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
-    mockedBcrypt.compare.mockResolvedValue(false);
+  // ─── validateUser ──────────────────────────────────────────────────────────
 
-    await expect(service.validateUser('a@a.com', 'wrong')).resolves.toBeNull();
+  describe('validateUser', () => {
+    it('returns sanitized user when credentials are correct', async () => {
+      const result = await service.validateUser(seededUser.email, seededUser.plainPassword);
+
+      expect(result).not.toBeNull();
+      expect(result!.email).toBe(seededUser.email);
+      expect(result).not.toHaveProperty('password');
+    });
+
+    it('returns null when password is wrong', async () => {
+      const result = await service.validateUser(seededUser.email, 'wrong-pass');
+      expect(result).toBeNull();
+    });
+
+    it('returns null when user does not exist', async () => {
+      const result = await service.validateUser('nobody@example.com', 'pass');
+      expect(result).toBeNull();
+    });
   });
 
-  it('signup should throw when email already exists', async () => {
+  // ─── signup ────────────────────────────────────────────────────────────────
+
+  describe('signup', () => {
     const dto: CreateUserDto = {
-      email: 'a@a.com',
-      firstName: 'A',
-      lastName: 'B',
-      password: 'pw1234',
+      email: 'auth-svc-signup@example.com',
+      firstName: 'New',
+      lastName: 'User',
+      password: 'Password123!',
     };
-    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
 
-    await expect(service.signup(dto)).rejects.toThrow(BadRequestException);
-    expect(mockUsersService.create).not.toHaveBeenCalled();
-  });
+    it('hashes password, creates user, and returns a JWT', async () => {
+      const result = await service.signup(dto);
+      userIdsToClean.push(result.user.id!);
 
-  it('signup should hash password, create user, and return auth response', async () => {
-    const dto: CreateUserDto = { email: 'a@a.com', firstName: 'A', lastName: 'B', password: 'pw' };
-    mockUsersService.findByEmail.mockResolvedValue(null);
-    mockedBcrypt.hash.mockResolvedValue('hashed-password');
-    mockUsersService.create.mockResolvedValue({
-      ...mockUser,
-      email: 'a@a.com',
-      password: 'hashed-password',
+      expect(result.accessToken).toBe('mock-jwt-token');
+      expect(result.user.email).toBe(dto.email);
+      expect(result.user).not.toHaveProperty('password');
     });
-    mockJwtService.sign.mockReturnValue('jwt-token');
 
-    await expect(service.signup(dto)).resolves.toEqual({
-      user: mockUser,
-      accessToken: 'jwt-token',
-    });
-    expect(mockUsersService.create).toHaveBeenCalledWith({
-      email: 'a@a.com',
-      firstName: 'A',
-      lastName: 'B',
-      password: 'hashed-password',
-      role: UserRole.USER,
-    });
-    expect(mockJwtService.sign).toHaveBeenCalledWith({ email: 'a@a.com', sub: '1' });
-  });
-
-  it('signIn should return auth response', async () => {
-    mockJwtService.sign.mockReturnValue('jwt-token');
-
-    await expect(service.signIn(mockUser)).resolves.toEqual({
-      user: mockUser,
-      accessToken: 'jwt-token',
-    });
-    expect(mockJwtService.sign).toHaveBeenCalledWith({ email: 'a@a.com', sub: '1' });
-  });
-
-  it('signInWithCredentials should return auth response for valid credentials', async () => {
-    mockUsersService.findByEmail.mockResolvedValue(mockUserWithPassword);
-    mockedBcrypt.compare.mockResolvedValue(true);
-    mockJwtService.sign.mockReturnValue('jwt-token');
-
-    await expect(service.signInWithCredentials('a@a.com', 'password')).resolves.toEqual({
-      user: mockUser,
-      accessToken: 'jwt-token',
+    it('throws BadRequestException when email is already in use', async () => {
+      await expect(service.signup(dto)).rejects.toThrow(BadRequestException);
     });
   });
 
-  it('signInWithCredentials should throw UnauthorizedException for invalid credentials', async () => {
-    mockUsersService.findByEmail.mockResolvedValue(null);
+  // ─── signIn ────────────────────────────────────────────────────────────────
 
-    await expect(service.signInWithCredentials('x@x.com', 'pw')).rejects.toThrow(
-      UnauthorizedException
-    );
+  describe('signIn', () => {
+    it('builds auth response from a pre-validated user object', async () => {
+      const userDto = {
+        id: seededUser.id,
+        email: seededUser.email,
+        firstName: seededUser.firstName,
+        lastName: seededUser.lastName,
+        role: 'USER' as const,
+      };
+
+      const result = await service.signIn(userDto as any);
+
+      expect(result.accessToken).toBe('mock-jwt-token');
+      expect(result.user.id).toBe(seededUser.id);
+    });
   });
 
-  it('getUserById should return user when found', async () => {
-    mockUsersService.findById.mockResolvedValue(mockUserWithPassword);
-    await expect(service.getUserById('foo')).resolves.toEqual(mockUser);
+  // ─── signInWithCredentials ─────────────────────────────────────────────────
+
+  describe('signInWithCredentials', () => {
+    it('returns auth response for valid credentials', async () => {
+      const result = await service.signInWithCredentials(
+        seededUser.email,
+        seededUser.plainPassword
+      );
+
+      expect(result.accessToken).toBeDefined();
+      expect(result.user.email).toBe(seededUser.email);
+    });
+
+    it('throws UnauthorizedException when password is wrong', async () => {
+      await expect(service.signInWithCredentials(seededUser.email, 'bad-pass')).rejects.toThrow(
+        UnauthorizedException
+      );
+    });
+
+    it('throws UnauthorizedException when user does not exist', async () => {
+      await expect(service.signInWithCredentials('ghost@example.com', 'pass')).rejects.toThrow(
+        UnauthorizedException
+      );
+    });
   });
 
-  it('getUserById should throw if not found', async () => {
-    mockUsersService.findById.mockResolvedValue(null);
-    await expect(service.getUserById('foo')).rejects.toThrow(BadRequestException);
+  // ─── getUserById ───────────────────────────────────────────────────────────
+
+  describe('getUserById', () => {
+    it('returns user without password field', async () => {
+      const result = await service.getUserById(seededUser.id);
+
+      expect(result.id).toBe(seededUser.id);
+      expect(result.email).toBe(seededUser.email);
+      expect(result).not.toHaveProperty('password');
+    });
+
+    it('throws BadRequestException when user is not found', async () => {
+      await expect(service.getUserById('00000000-0000-0000-0000-000000000000')).rejects.toThrow(
+        BadRequestException
+      );
+    });
   });
 });

@@ -1,7 +1,7 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from '@my-monorepo/database/src/lib/generated/client/client';
+import { IUser } from '@my-monorepo/types';
 
 import { AuthService } from '../../resources/auth/auth.service';
 
@@ -13,13 +13,13 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
     });
   }
 
-  async validate(email: string, password: string): Promise<User> {
+  async validate(email: string, password: string): Promise<IUser> {
     const user = await this.authService.validateUser(email, password);
 
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    return user as User;
+    return user as IUser;
   }
 }
