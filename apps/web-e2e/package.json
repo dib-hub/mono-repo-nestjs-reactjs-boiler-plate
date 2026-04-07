@@ -2,5 +2,8 @@
   "name": "@my-monorepo/web-e2e",
   "version": "1.0.0",
   "description": "Web end-to-end tests with Playwright",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
 }
