@@ -9,7 +9,6 @@ import { AuthController } from '@src/resources/auth/auth.controller';
 import { AuthService } from '@src/resources/auth/auth.service';
 import { GmailService } from '@src/services/gmail/gmail.service';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
-import { PasswordResetController } from '@src/services/password-reset/password-reset.controller';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 
 @Module({
@@ -31,7 +30,7 @@ import { PasswordResetService } from '@src/services/password-reset/password-rese
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController, PasswordResetController],
+  controllers: [AuthController],
   providers: [
     AuthService,
     JwtStrategy,
