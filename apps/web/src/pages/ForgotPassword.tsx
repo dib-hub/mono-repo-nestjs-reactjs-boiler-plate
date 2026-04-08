@@ -55,6 +55,12 @@ export const ForgotPassword: FC = (): JSX.Element => {
     setSuccessMessage('');
   }, []);
 
+  const handleFormSubmit = useCallback((): ((e: FormEvent) => void) => {
+    return (e: FormEvent): void => {
+      void handleSubmit(e);
+    };
+  }, [handleSubmit]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -73,12 +79,7 @@ export const ForgotPassword: FC = (): JSX.Element => {
           )}
 
           {!submitted ? (
-            <form
-              onSubmit={(e) => {
-                void handleSubmit(e);
-              }}
-              className="space-y-4"
-            >
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <Input

@@ -1,18 +1,8 @@
-import {
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  Param,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { IUser, REST_RESOURCE, REST_RESOURCE_ID, type JwtAuthRequest } from '@my-monorepo/types';
-import { LocalAuthGuard } from '@src/common/guards/local.guard';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { IUser, REST_RESOURCE, type JwtAuthRequest } from '@my-monorepo/types';
 import { Public } from '@src/common/guards/public.decorator';
 import { AuthService } from '@src/resources/auth/auth.service';
-import { AuthResponseDto, GoogleAuthDto } from '@src/resources/auth/dto/auth.dto';
+import { AuthResponseDto, GoogleAuthDto, SignInDto } from '@src/resources/auth/dto/auth.dto';
 import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 
@@ -31,9 +21,8 @@ export class AuthController {
 
   @Post(REST_RESOURCE.SIGNIN)
   @Public()
-  @UseGuards(LocalAuthGuard)
-  async signIn(@Req() req: { user: UserDto }): Promise<AuthResponseDto> {
-    return await this.authService.signIn(req.user);
+  async signIn(@Body() body: SignInDto): Promise<AuthResponseDto> {
+    return await this.authService.signInWithCredentials(body.email, body.password);
   }
 
   @Post(REST_RESOURCE.GOOGLE)
@@ -48,13 +37,5 @@ export class AuthController {
   @Get(REST_RESOURCE.ME)
   async me(@Req() req: JwtAuthRequest): Promise<UserDto> {
     return await this.authService.getUserById(req.user.userId);
-  }
-
-  @Get(REST_RESOURCE_ID.ID)
-  async getUserById(@Param('id') id: string, @Req() req: JwtAuthRequest): Promise<UserDto> {
-    if (req.user.userId !== id) {
-      throw new ForbiddenException();
-    }
-    return await this.authService.getUserById(id);
   }
 }

@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
+import { IUser, UserRole } from '@my-monorepo/types';
 
-import type { User as DbUser, UserRole } from '../../generated/client/client';
 import { PrismaService } from '../../prisma.service';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findById(id: string): Promise<DbUser | null> {
+  findById(id: string): Promise<IUser | null> {
     return this.prisma.user.findUnique({
       where: { id },
-    });
+    }) as Promise<IUser | null>;
   }
 
-  findByEmail(email: string): Promise<DbUser | null> {
+  findByEmail(email: string): Promise<IUser | null> {
     return this.prisma.user.findUnique({
       where: { email },
-    });
+    }) as Promise<IUser | null>;
   }
 
   create(data: {
@@ -25,13 +25,13 @@ export class UsersService {
     lastName: string;
     password: string;
     role: UserRole;
-  }): Promise<DbUser> {
+  }): Promise<IUser> {
     return this.prisma.user.create({
       data,
-    });
+    }) as Promise<IUser>;
   }
 
-  findAll(): Promise<DbUser[]> {
-    return this.prisma.user.findMany();
+  findAll(): Promise<IUser[]> {
+    return this.prisma.user.findMany() as Promise<IUser[]>;
   }
 }

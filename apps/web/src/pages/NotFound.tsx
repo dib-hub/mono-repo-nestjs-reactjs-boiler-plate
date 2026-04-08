@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function NotFound(): JSX.Element {
+const NotFound = (): JSX.Element => {
   return (
     <div className="min-h-full flex items-center justify-center bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 p-4">
       <div className="max-w-lg w-full bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center">
@@ -35,4 +35,6 @@ export default function NotFound(): JSX.Element {
       </div>
     </div>
   );
-}
+};
+
+export default NotFound;

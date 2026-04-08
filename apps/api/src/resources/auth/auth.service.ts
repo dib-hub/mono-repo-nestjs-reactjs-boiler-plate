@@ -54,14 +54,10 @@ export class AuthService {
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       password: hashedPassword,
-      role: UserRole.USER, // Default role, can be adjusted as needed
+      role: UserRole.USER,
     });
 
     return this.buildAuthResponse(this.toUserDto(user as UserDto & { password?: string }));
-  }
-
-  async signIn(user: UserDto): Promise<AuthResponseDto> {
-    return await this.buildAuthResponse(user);
   }
 
   async signInWithCredentials(email: string, password: string): Promise<AuthResponseDto> {

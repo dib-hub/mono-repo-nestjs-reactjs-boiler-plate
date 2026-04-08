@@ -15,6 +15,12 @@ describe('ProfilesService', () => {
   let prisma: PrismaService;
   let seededUser: SeededTestUser;
   const userIdsToClean: string[] = [];
+  const profileTestDto: UpsertProfileDto = {
+    name: 'Service Test Profile',
+    email: 'svc-test@example.com',
+    linkedInUrl: 'https://linkedin.com/in/svctest',
+    githubUrl: 'https://github.com/svctest',
+  };
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -24,11 +30,6 @@ describe('ProfilesService', () => {
     service = module.get<ProfilesService>(ProfilesService);
     prisma = module.get<PrismaService>(PrismaService);
     await prisma.onModuleInit();
-
-    seededUser = await createTestUser(prisma, {
-      email: 'profiles-svc-test@example.com',
-    });
-    userIdsToClean.push(seededUser.id);
   });
 
   afterAll(async () => {
@@ -37,55 +38,33 @@ describe('ProfilesService', () => {
     await module.close();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  // ─── getProfileByUserId ──────────────────────────────────────────────────
-
-  describe('getProfileByUserId', () => {
-    it('returns the profile for a valid userId', async () => {
-      const dto: UpsertProfileDto = {
-        name: 'Jane Doe',
-        email: 'jane@example.com',
-        linkedInUrl: 'https://linkedin.com/in/janedoe',
-        githubUrl: 'https://github.com/janedoe',
-      };
-      await service.upsertProfile(seededUser.id, dto);
-
-      const result = await service.getProfileByUserId(seededUser.id);
-
-      expect(result).toBeDefined();
-      expect(result.userId).toBe(seededUser.id);
-      expect(result.name).toBe('Jane Doe');
-    });
-
-    it('returns null when profile does not exist', async () => {
-      const result = await service.getProfileByUserId('00000000-0000-0000-0000-000000000000');
-      expect(result).toBeNull();
-    });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
   // ─── upsertProfile ──────────────────────────────────────────────────────────
 
   describe('upsertProfile', () => {
-    it('creates a new profile with all fields', async () => {
+    it('creates a new profile with all fields for the test user', async () => {
       const newUser = await createTestUser(prisma, {
         email: 'profiles-upsert-test@example.com',
       });
       userIdsToClean.push(newUser.id);
+      seededUser = newUser;
+      if (!seededUser?.id) {
+        throw new Error(
+          'seededUser was not created — getProfileByUserId tests will fail without it'
+        );
+      }
 
-      const dto: UpsertProfileDto = {
-        name: 'New Name',
-        email: 'new@example.com',
-        linkedInUrl: 'https://linkedin.com',
-        githubUrl: null,
-      };
+      const result = await service.upsertProfile(newUser.id, profileTestDto);
 
-      const result = await service.upsertProfile(newUser.id, dto);
-
-      expect(result.name).toBe('New Name');
-      expect(result.email).toBe('new@example.com');
+      expect(result.name).toBe(profileTestDto.name);
+      expect(result.email).toBe(profileTestDto.email);
       expect(result.userId).toBe(newUser.id);
     });
 
@@ -125,6 +104,24 @@ describe('ProfilesService', () => {
 
       expect(result.name).toBe('Updated Name');
       expect(result.email).toBe('updated@example.com');
+    });
+  });
+
+  // ─── getProfileByUserId ──────────────────────────────────────────────────
+
+  describe('getProfileByUserId', () => {
+    it('returns the upserted profile for the test user', async () => {
+      const result = await service.getProfileByUserId(seededUser.id);
+
+      expect(result).toBeDefined();
+      expect(result.userId).toBe(seededUser.id);
+      expect(result.name).toBe(profileTestDto.name);
+      expect(result.email).toBe(profileTestDto.email);
+    });
+
+    it('returns null when profile does not exist', async () => {
+      const result = await service.getProfileByUserId('00000000-0000-0000-0000-000000000000');
+      expect(result).toBeNull();
     });
   });
 });

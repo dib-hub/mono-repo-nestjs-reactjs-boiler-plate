@@ -23,3 +23,14 @@ export interface IAuthResponse {
   user: IUser;
   accessToken: string;
 }
+
+export interface AuthenticatedRequest {
+  headers: {
+    authorization?: string;
+  };
+  user?: {
+    userId: string;
+    email: string;
+  };
+  method?: string;
+}

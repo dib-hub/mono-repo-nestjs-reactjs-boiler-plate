@@ -20,6 +20,12 @@ describe('ProfilesController', () => {
   let prisma: PrismaService;
   let seededUser: SeededTestUser;
   const userIdsToClean: string[] = [];
+  const profileTestDto: UpsertProfileDto = {
+    name: 'New Controller Profile',
+    email: 'ctrl-new@example.com',
+    linkedInUrl: 'https://linkedin.com/in/ctrl',
+    githubUrl: null,
+  };
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -31,11 +37,6 @@ describe('ProfilesController', () => {
     service = module.get<ProfilesService>(ProfilesService);
     prisma = module.get<PrismaService>(PrismaService);
     await prisma.onModuleInit();
-
-    seededUser = await createTestUser(prisma, {
-      email: 'profiles-ctrl-test@example.com',
-    });
-    userIdsToClean.push(seededUser.id);
   });
 
   afterAll(async () => {
@@ -48,33 +49,6 @@ describe('ProfilesController', () => {
     expect(controller).toBeDefined();
   });
 
-  // ─── getProfileByUserId ─────────────────────────────────────────────────────
-
-  describe('getProfileByUserId', () => {
-    it('returns profile from DB when authenticated user matches route param', async () => {
-      // Seed a profile so there is something to fetch
-      await service.upsertProfile(seededUser.id, {
-        name: 'Test Profile',
-        email: 'profile@example.com',
-      });
-
-      const req = { user: { userId: seededUser.id, email: seededUser.email } };
-      const result = await controller.getProfileByUserId(seededUser.id, req as any);
-
-      expect(result).toBeDefined();
-      expect(result.userId).toBe(seededUser.id);
-      expect(result.name).toBe('Test Profile');
-    });
-
-    it('throws ForbiddenException when authenticated user differs from route param', async () => {
-      const req = { user: { userId: 'other-user-id', email: 'other@example.com' } };
-
-      await expect(controller.getProfileByUserId(seededUser.id, req as any)).rejects.toThrow(
-        ForbiddenException
-      );
-    });
-  });
-
   // ─── upsertProfile ───────────────────────────────────────────────────────────
 
   describe('upsertProfile', () => {
@@ -83,44 +57,53 @@ describe('ProfilesController', () => {
         email: 'profiles-ctrl-create@example.com',
       });
       userIdsToClean.push(newUser.id);
+      seededUser = newUser;
+      if (!seededUser?.id) {
+        throw new Error(
+          'seededUser was not created — getProfileByUserId tests will fail without it'
+        );
+      }
 
-      const dto: UpsertProfileDto = {
-        name: 'New Controller Profile',
-        email: 'ctrl-new@example.com',
-        linkedInUrl: 'https://linkedin.com/in/ctrl',
-        githubUrl: null,
-      };
       const req = { user: { userId: newUser.id, email: newUser.email } };
+      const result = await controller.upsertProfile(newUser.id, req as any, profileTestDto);
 
-      const result = await controller.upsertProfile(newUser.id, req as any, dto);
-
-      expect(result.name).toBe('New Controller Profile');
+      expect(result.name).toBe(profileTestDto.name);
       expect(result.userId).toBe(newUser.id);
 
       // Verify it was actually persisted
       const dbProfile = await prisma.profile.findUnique({ where: { userId: newUser.id } });
       expect(dbProfile).not.toBeNull();
-      expect(dbProfile!.name).toBe('New Controller Profile');
+      expect(dbProfile!.name).toBe(profileTestDto.name);
     });
+  });
 
-    it('updates an existing profile in DB', async () => {
-      const dto: UpsertProfileDto = {
-        name: 'Updated Controller Profile',
-        email: 'ctrl-updated@example.com',
-      };
+  // ─── getProfileByUserId ─────────────────────────────────────────────────────
+
+  describe('getProfileByUserId', () => {
+    it('upserts the profile using profileTestDto for the authenticated user', async () => {
       const req = { user: { userId: seededUser.id, email: seededUser.email } };
+      const result = await controller.upsertProfile(seededUser.id, req as any, profileTestDto);
 
-      const result = await controller.upsertProfile(seededUser.id, req as any, dto);
-
-      expect(result.name).toBe('Updated Controller Profile');
-      expect(result.email).toBe('ctrl-updated@example.com');
+      expect(result.userId).toBe(seededUser.id);
+      expect(result.name).toBe(profileTestDto.name);
     });
 
-    it("throws ForbiddenException when trying to update another user's profile", async () => {
-      const dto: UpsertProfileDto = { name: 'Intruder', email: 'intruder@example.com' };
-      const req = { user: { userId: 'intruder-id', email: 'intruder@example.com' } };
+    it('returns the upserted profile from DB when authenticated user matches route param', async () => {
+      const req = { user: { userId: seededUser.id, email: seededUser.email } };
+      const result = await controller.getProfileByUserId(seededUser.id, req as any);
 
-      await expect(controller.upsertProfile(seededUser.id, req as any, dto)).rejects.toThrow(
+      expect(result).toBeDefined();
+      expect(result.userId).toBe(seededUser.id);
+      expect(result.name).toBe(profileTestDto.name);
+      expect(result.email).toBe(profileTestDto.email);
+      expect(result.linkedInUrl).toBe(profileTestDto.linkedInUrl);
+      expect(result.githubUrl).toBe(profileTestDto.githubUrl);
+    });
+
+    it('throws ForbiddenException when authenticated user differs from route param', async () => {
+      const req = { user: { userId: 'other-user-id', email: 'other@example.com' } };
+
+      await expect(controller.getProfileByUserId(seededUser.id, req as any)).rejects.toThrow(
         ForbiddenException
       );
     });

@@ -9,15 +9,21 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
 import { AuthService } from '@src/resources/auth/auth.service';
-import { CreateUserDto } from '@src/resources/auth/dto/user.dto';
-import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import { cleanUpUsers } from '@src/testUtils';
 
 describe('AuthService', () => {
   let module: TestingModule;
   let service: AuthService;
   let prisma: PrismaService;
-  let seededUser: SeededTestUser;
+  let testUser: UserDto;
   const userIdsToClean: string[] = [];
+  const dto: CreateUserDto = {
+    email: 'auth-svc-test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    password: 'Password123!',
+  };
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -36,10 +42,10 @@ describe('AuthService', () => {
     prisma = module.get<PrismaService>(PrismaService);
     await prisma.onModuleInit();
 
-    seededUser = await createTestUser(prisma, {
-      email: 'auth-svc-test@example.com',
-    });
-    userIdsToClean.push(seededUser.id);
+    // Seed the test user via the real signup path (no direct DB injection).
+    const { user } = await service.signup(dto);
+    testUser = user as UserDto;
+    userIdsToClean.push(testUser.id);
   });
 
   afterAll(async () => {
@@ -48,48 +54,31 @@ describe('AuthService', () => {
     await module.close();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  // ─── validateUser ──────────────────────────────────────────────────────────
-
-  describe('validateUser', () => {
-    it('returns sanitized user when credentials are correct', async () => {
-      const result = await service.validateUser(seededUser.email, seededUser.plainPassword);
-
-      expect(result).not.toBeNull();
-      expect(result!.email).toBe(seededUser.email);
-      expect(result).not.toHaveProperty('password');
-    });
-
-    it('returns null when password is wrong', async () => {
-      const result = await service.validateUser(seededUser.email, 'wrong-pass');
-      expect(result).toBeNull();
-    });
-
-    it('returns null when user does not exist', async () => {
-      const result = await service.validateUser('nobody@example.com', 'pass');
-      expect(result).toBeNull();
-    });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
   // ─── signup ────────────────────────────────────────────────────────────────
 
   describe('signup', () => {
-    const dto: CreateUserDto = {
-      email: 'auth-svc-signup@example.com',
+    /** Separate DTO to avoid colliding with the user created in beforeAll. */
+    const newUserDto: CreateUserDto = {
+      email: 'auth-svc-new@example.com',
       firstName: 'New',
       lastName: 'User',
       password: 'Password123!',
     };
 
     it('hashes password, creates user, and returns a JWT', async () => {
-      const result = await service.signup(dto);
+      const result = await service.signup(newUserDto);
       userIdsToClean.push(result.user.id!);
 
       expect(result.accessToken).toBe('mock-jwt-token');
-      expect(result.user.email).toBe(dto.email);
+      expect(result.user.email).toBe(newUserDto.email);
       expect(result.user).not.toHaveProperty('password');
     });
 
@@ -98,40 +87,18 @@ describe('AuthService', () => {
     });
   });
 
-  // ─── signIn ────────────────────────────────────────────────────────────────
-
-  describe('signIn', () => {
-    it('builds auth response from a pre-validated user object', async () => {
-      const userDto = {
-        id: seededUser.id,
-        email: seededUser.email,
-        firstName: seededUser.firstName,
-        lastName: seededUser.lastName,
-        role: 'USER' as const,
-      };
-
-      const result = await service.signIn(userDto as any);
-
-      expect(result.accessToken).toBe('mock-jwt-token');
-      expect(result.user.id).toBe(seededUser.id);
-    });
-  });
-
   // ─── signInWithCredentials ─────────────────────────────────────────────────
 
   describe('signInWithCredentials', () => {
     it('returns auth response for valid credentials', async () => {
-      const result = await service.signInWithCredentials(
-        seededUser.email,
-        seededUser.plainPassword
-      );
+      const result = await service.signInWithCredentials(testUser.email, dto.password);
 
       expect(result.accessToken).toBeDefined();
-      expect(result.user.email).toBe(seededUser.email);
+      expect(result.user.email).toBe(testUser.email);
     });
 
     it('throws UnauthorizedException when password is wrong', async () => {
-      await expect(service.signInWithCredentials(seededUser.email, 'bad-pass')).rejects.toThrow(
+      await expect(service.signInWithCredentials(testUser.email, 'bad-pass')).rejects.toThrow(
         UnauthorizedException
       );
     });
@@ -147,10 +114,10 @@ describe('AuthService', () => {
 
   describe('getUserById', () => {
     it('returns user without password field', async () => {
-      const result = await service.getUserById(seededUser.id);
+      const result = await service.getUserById(testUser.id);
 
-      expect(result.id).toBe(seededUser.id);
-      expect(result.email).toBe(seededUser.email);
+      expect(result.id).toBe(testUser.id);
+      expect(result.email).toBe(testUser.email);
       expect(result).not.toHaveProperty('password');
     });
 

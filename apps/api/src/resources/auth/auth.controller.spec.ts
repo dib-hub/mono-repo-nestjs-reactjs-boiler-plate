@@ -6,22 +6,28 @@
  * (external OAuth, no network calls in tests).
  */
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
 import { AuthController } from '@src/resources/auth/auth.controller';
 import { AuthService } from '@src/resources/auth/auth.service';
 import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
-import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
+import { cleanUpUsers } from '@src/testUtils';
 
 describe('AuthController', () => {
   let module: TestingModule;
   let controller: AuthController;
   let prisma: PrismaService;
-  let seededUser: SeededTestUser;
+  let testUser: UserDto;
   let googleAuthService: { loginWithGoogle: jest.Mock };
   const userIdsToClean: string[] = [];
+  const dto: CreateUserDto = {
+    email: 'auth-ctrl-test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    password: 'Password123!',
+  };
 
   beforeAll(async () => {
     googleAuthService = { loginWithGoogle: jest.fn() };
@@ -41,10 +47,10 @@ describe('AuthController', () => {
     prisma = module.get<PrismaService>(PrismaService);
     await prisma.onModuleInit();
 
-    seededUser = await createTestUser(prisma, {
-      email: 'auth-ctrl-test@example.com',
-    });
-    userIdsToClean.push(seededUser.id);
+    // Seed the test user via the real signUp path (no direct DB injection).
+    const { user } = await controller.signUp(dto);
+    testUser = user as UserDto;
+    userIdsToClean.push(testUser.id);
   });
 
   afterAll(async () => {
@@ -65,23 +71,23 @@ describe('AuthController', () => {
   // ─── signUp ────────────────────────────────────────────────────────────────
 
   describe('signUp', () => {
-    const dto: CreateUserDto = {
-      email: 'auth-ctrl-signup@example.com',
+    /** Separate DTO to avoid colliding with the user created in beforeAll. */
+    const newUserDto: CreateUserDto = {
+      email: 'auth-ctrl-new@example.com',
       firstName: 'New',
       lastName: 'User',
       password: 'Password123!',
     };
 
-    it('creates a user in DB and returns an auth response', async () => {
-      const result = await controller.signUp(dto);
+    it('creates a new user in DB and returns an auth response', async () => {
+      const result = await controller.signUp(newUserDto);
       userIdsToClean.push(result.user.id!);
 
       expect(result.accessToken).toBe('mock-jwt-token');
-      expect(result.user.email).toBe(dto.email);
+      expect(result.user.email).toBe(newUserDto.email);
       expect(result.user).not.toHaveProperty('password');
 
-      // Verify the user was actually persisted
-      const dbUser = await prisma.user.findUnique({ where: { email: dto.email } });
+      const dbUser = await prisma.user.findUnique({ where: { email: newUserDto.email } });
       expect(dbUser).not.toBeNull();
     });
 
@@ -93,58 +99,36 @@ describe('AuthController', () => {
   // ─── signIn ────────────────────────────────────────────────────────────────
 
   describe('signIn', () => {
-    it('returns auth response from a pre-validated user object (simulates LocalStrategy output)', async () => {
+    it('returns auth response for the dto user (simulates LocalStrategy output)', async () => {
       const req = {
         user: {
-          id: seededUser.id,
-          email: seededUser.email,
-          firstName: seededUser.firstName,
-          lastName: seededUser.lastName,
-          role: 'USER' as const,
+          id: testUser.id,
+          email: testUser.email,
+          firstName: testUser.firstName,
+          lastName: testUser.lastName,
+          role: testUser.role,
         },
       };
 
       const result = await controller.signIn(req as any);
 
       expect(result.accessToken).toBe('mock-jwt-token');
-      expect(result.user.id).toBe(seededUser.id);
-      expect(result.user.email).toBe(seededUser.email);
+      expect(result.user.id).toBe(testUser.id);
+      expect(result.user.email).toBe(testUser.email);
     });
   });
 
   // ─── me ───────────────────────────────────────────────────────────────────
 
   describe('me', () => {
-    it('returns the real user from DB identified by JWT payload userId', async () => {
-      const req = { user: { userId: seededUser.id, email: seededUser.email } };
+    it('returns the dto user from DB identified by JWT payload userId', async () => {
+      const req = { user: { userId: testUser.id, email: testUser.email } };
 
       const result = await controller.me(req as any);
 
-      expect(result.id).toBe(seededUser.id);
-      expect(result.email).toBe(seededUser.email);
+      expect(result.id).toBe(testUser.id);
+      expect(result.email).toBe(testUser.email);
       expect(result).not.toHaveProperty('password');
-    });
-  });
-
-  // ─── getUserById ───────────────────────────────────────────────────────────
-
-  describe('getUserById', () => {
-    it('returns the real user from DB when requesting user matches the target id', async () => {
-      const req = { user: { userId: seededUser.id, email: seededUser.email } };
-
-      const result = await controller.getUserById(seededUser.id, req as any);
-
-      expect(result.id).toBe(seededUser.id);
-      expect(result.email).toBe(seededUser.email);
-      expect(result).not.toHaveProperty('password');
-    });
-
-    it('throws ForbiddenException when requesting a different user ID', async () => {
-      const req = { user: { userId: 'different-id', email: 'other@example.com' } };
-
-      await expect(controller.getUserById(seededUser.id, req as any)).rejects.toThrow(
-        ForbiddenException
-      );
     });
   });
 
@@ -153,7 +137,7 @@ describe('AuthController', () => {
   describe('googleLogin', () => {
     it('delegates to GoogleAuthService (mocked — external OAuth) and returns its response', async () => {
       const mockResponse = {
-        user: { id: seededUser.id, email: seededUser.email } as any,
+        user: { id: testUser.id, email: testUser.email } as any,
         accessToken: 'google-jwt',
       };
       googleAuthService.loginWithGoogle.mockResolvedValue(mockResponse);

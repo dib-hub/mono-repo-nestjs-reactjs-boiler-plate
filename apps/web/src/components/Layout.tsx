@@ -1,4 +1,4 @@
-import { ReactNode, JSX } from 'react';
+import { ReactNode, JSX, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@src/redux/store';
@@ -13,10 +13,12 @@ export default function Layout({ children }: LayoutProps): JSX.Element {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.authSlice);
 
-  const handleLogout = (): void => {
-    dispatch(logout());
-    navigate('/sign-in');
-  };
+  const handleLogout = useMemo((): (() => void) => {
+    return () => {
+      dispatch(logout());
+      navigate('/sign-in');
+    };
+  }, [dispatch, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
