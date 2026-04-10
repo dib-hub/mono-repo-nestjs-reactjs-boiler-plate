@@ -1,0 +1,66 @@
+name: Quality Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    # Use a Linux runner for consistent CI behavior.
+    runs-on: ubuntu-latest
+
+    steps:
+      # Pull repository code into the runner.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Install pnpm so workspace commands are available.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      # Set Node.js version and enable pnpm dependency caching.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Install all monorepo dependencies from lockfile.
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # Configure Nx base branch to support branch-aware Nx behavior.
+      - name: Set Nx base
+        run: |
+          if [ -n "${{ github.base_ref }}" ]; then
+            echo "NX_BASE=origin/${{ github.base_ref }}" >> $GITHUB_ENV
+          else
+            echo "NX_BASE=origin/${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      # Disable Nx Cloud for this workflow run.
+      - name: Disable Nx Cloud
+        run: |
+          echo "NX_CLOUD=false" >> $GITHUB_ENV
+          echo "NX_NO_CLOUD=true" >> $GITHUB_ENV
+
+      # Lint all projects sequentially with verbose logs.
+      - name: Lint
+        run: pnpm exec nx run-many --target=lint --all --parallel=1 --output-style=stream --verbose
+
+      # Run tests and generate coverage output.
+      - name: Run tests with coverage
+        run: pnpm run test:cov
+
+      # Upload coverage only in GitHub Actions (skip local act runner).
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: ${{ (success() || failure()) && github.actor != 'nektos/act' }}
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

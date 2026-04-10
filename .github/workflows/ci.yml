@@ -1,0 +1,68 @@
+name: CI Build
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Disable Nx Cloud
+        run: |
+          echo "NX_CLOUD=false" >> $GITHUB_ENV
+          echo "NX_NO_CLOUD=true" >> $GITHUB_ENV
+
+      - name: Build API
+        run: pnpm exec nx run api:build
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Disable Nx Cloud
+        run: |
+          echo "NX_CLOUD=false" >> $GITHUB_ENV
+          echo "NX_NO_CLOUD=true" >> $GITHUB_ENV
+
+      - name: Build Web
+        run: pnpm exec nx run web:build
