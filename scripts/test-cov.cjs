@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 const { resolve } = require('path');
 const { config: loadEnv } = require('dotenv');
+const { existsSync } = require('fs');
 
 const rootDir = resolve(__dirname, '..');
 const isWindows = process.platform === 'win32';
@@ -8,12 +9,15 @@ const isWindows = process.platform === 'win32';
 loadEnv({ path: resolve(rootDir, '.env.test'), override: true });
 
 function localBin(name) {
-  return resolve(rootDir, 'node_modules', '.bin', isWindows ? `${name}.CMD` : name);
+  const candidate = resolve(rootDir, 'node_modules', '.bin', isWindows ? `${name}.CMD` : name);
+  return existsSync(candidate) ? candidate : name;
 }
 
 function run(command, args, options = {}) {
   return new Promise((resolveRun, rejectRun) => {
-    const useShell = options.shell ?? (isWindows && command.toLowerCase().endsWith('.cmd'));
+    // On Windows, spawning bare commands like "pnpm" (resolved via PATH / .cmd shims)
+    // works more reliably through the shell.
+    const useShell = options.shell ?? isWindows;
     const child = spawn(command, args, {
       cwd: rootDir,
       env: { ...process.env, ...(options.env ?? {}) },

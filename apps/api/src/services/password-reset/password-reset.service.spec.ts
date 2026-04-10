@@ -1,9 +1,3 @@
-/**
- * PasswordResetService — integration tests
- *
- * Uses real PrismaService against the Docker test database.
- * GmailService is mocked (external email service).
- */
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '@my-monorepo/database';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
