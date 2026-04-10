@@ -11,7 +11,7 @@ A modern full-stack NX monorepo featuring:
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - pnpm 8+ (recommended) or npm
 - Docker & Docker Compose (for local PostgreSQL)
 
@@ -73,12 +73,12 @@ pnpm nx serve web
 
 Open:
 
-- **API**: http://localhost:3000/api
-- **Web**: http://localhost:4200
+- **API**: <http://localhost:3000/api>
+- **Web**: <http://localhost:4200>
 
 ## 📂 Project Structure
 
-```
+```bash
 monorepo-template/
 ├── apps/
 │   ├── api/                 # NestJS backend
@@ -392,7 +392,7 @@ pnpm nx lint --fix
 
 Use conventional commits:
 
-```
+```bash
 feat: add user authentication
 fix: resolve database connection issue
 docs: update API documentation

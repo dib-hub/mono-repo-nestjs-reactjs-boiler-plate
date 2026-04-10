@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────
 # Stage 1: Builder
 # ─────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY libs/types/package.json ./libs/types/package.json
 COPY libs/repository/package.json ./libs/repository/package.json
 
 RUN pnpm config set registry https://registry.npmmirror.com && \
-    pnpm install --frozen-lockfile --shamefully-hoist
+  pnpm install --frozen-lockfile --shamefully-hoist
 
 # Copy full source
 COPY . .
