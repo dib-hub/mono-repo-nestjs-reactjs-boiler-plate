@@ -13,7 +13,6 @@
   "compilerOptions": {
     "target": "ES2020",
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "@src/*": ["src/*"],
       "@my-monorepo/database": ["../../libs/repository/src/index.ts"],

@@ -1,6 +1,6 @@
 import { JSX, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { IProfileFormData, IUpsertProfile } from '@my-monorepo/types';
+import { IProfileFormData } from '@my-monorepo/types';
 import { clearProfileError, clearProfileSuccess } from '@src/redux/slices/profileSlice';
 import type { AppDispatch, RootState } from '@src/redux/store';
 import { getProfileByUserId, upsertProfile } from '@src/services/profile';
@@ -83,11 +83,11 @@ const ProfilePage = (): JSX.Element => {
 
     dispatch(clearProfileError());
 
-    const payload: IUpsertProfile = {
+    const payload: IProfileFormData = {
       name: editData.name.trim(),
       email: editData.email.trim(),
-      linkedInUrl: editData.linkedInUrl.trim() || null,
-      githubUrl: editData.githubUrl.trim() || null,
+      ...(editData.linkedInUrl ? { linkedInUrl: editData.linkedInUrl.trim() } : {}),
+      ...(editData.githubUrl ? { githubUrl: editData.githubUrl.trim() } : {}),
     };
 
     const resultAction = await dispatch(
@@ -131,11 +131,11 @@ const ProfilePage = (): JSX.Element => {
       profileData.linkedInUrl,
       profileData.githubUrl,
     ];
-    const completedFields = fields.filter((value) => value.trim().length > 0).length;
+    const completedFields = fields.filter((value) => value && value.trim().length > 0).length;
     return Math.round((completedFields / fields.length) * 100);
   }, [profileData]);
 
-  const renderUrlField = useCallback((url: string, emptyText: string): JSX.Element => {
+  const renderUrlField = useCallback((emptyText: string, url?: string): JSX.Element => {
     if (!url) {
       return <div className="px-4 py-3 rounded-xl bg-white/50 text-gray-500">{emptyText}</div>;
     }
@@ -246,7 +246,7 @@ const ProfilePage = (): JSX.Element => {
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
                 ) : (
-                  renderUrlField(profileData.linkedInUrl, 'No LinkedIn URL set')
+                  renderUrlField('No LinkedIn URL set', profileData?.linkedInUrl)
                 )}
               </div>
 
@@ -261,7 +261,7 @@ const ProfilePage = (): JSX.Element => {
                     placeholder="https://github.com/yourprofile"
                   />
                 ) : (
-                  renderUrlField(profileData.githubUrl, 'No GitHub URL set')
+                  renderUrlField('No GitHub URL set', profileData?.githubUrl)
                 )}
               </div>
             </div>
