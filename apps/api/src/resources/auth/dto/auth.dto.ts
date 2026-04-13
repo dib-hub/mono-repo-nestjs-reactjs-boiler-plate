@@ -1,5 +1,4 @@
 import {
-  IUser,
   type IAuthResponse,
   type IGoogleAuth,
   type ISignIn,
@@ -8,6 +7,8 @@ import {
 } from '@my-monorepo/types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+
+import { UserDto } from './user.dto';
 
 export class SignInDto implements ISignIn {
   @ApiProperty({
@@ -66,49 +67,49 @@ export class UpdateUserDto implements IUpdateUser {
   role?: UserRole;
 }
 
-export class UserResponseDto implements IUser {
-  @ApiProperty({
-    example: 'clx9z2kq00001abc123',
-  })
-  id: string;
+// export class UserResponseDto implements Omit<IUser, 'password'> {
+//   @ApiProperty({
+//     example: 'clx9z2kq00001abc123',
+//   })
+//   id: string;
 
-  @ApiProperty({
-    example: 'john@example.com',
-  })
-  email: string;
+//   @ApiProperty({
+//     example: 'john@example.com',
+//   })
+//   email: string;
 
-  @ApiProperty({
-    example: 'John',
-  })
-  firstName: string;
+//   @ApiProperty({
+//     example: 'John',
+//   })
+//   firstName: string;
 
-  @ApiProperty({
-    example: 'Doe',
-  })
-  lastName: string;
+//   @ApiProperty({
+//     example: 'Doe',
+//   })
+//   lastName: string;
 
-  @ApiProperty({
-    enum: UserRole,
-    example: UserRole.USER,
-  })
-  role: UserRole;
+//   @ApiProperty({
+//     enum: UserRole,
+//     example: UserRole.USER,
+//   })
+//   role: UserRole;
 
-  @ApiProperty({
-    example: '2025-01-01T10:00:00.000Z',
-  })
-  createdAt: Date;
+//   @ApiProperty({
+//     example: '2025-01-01T10:00:00.000Z',
+//   })
+//   createdAt: Date;
 
-  @ApiProperty({
-    example: '2025-01-01T10:00:00.000Z',
-  })
-  updatedAt: Date;
-}
+//   @ApiProperty({
+//     example: '2025-01-01T10:00:00.000Z',
+//   })
+//   updatedAt: Date;
+// }
 
 export class AuthResponseDto implements IAuthResponse {
   @ApiProperty({
-    type: UserResponseDto,
+    type: UserDto,
   })
-  user: UserResponseDto;
+  user: UserDto;
 
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',

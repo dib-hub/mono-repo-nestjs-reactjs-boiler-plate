@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IUser, UserRole } from '@my-monorepo/types';
+import { CreateUser, IUser } from '@my-monorepo/types';
 
 import { PrismaService } from '../../prisma.service';
 
@@ -19,13 +19,7 @@ export class UsersService {
     }) as Promise<IUser | null>;
   }
 
-  create(data: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    password: string;
-    role: UserRole;
-  }): Promise<IUser> {
+  create(data: CreateUser): Promise<IUser> {
     return this.prisma.user.create({
       data,
     }) as Promise<IUser>;

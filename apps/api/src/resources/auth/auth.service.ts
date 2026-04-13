@@ -42,7 +42,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    return this.toUserDto(user as UserDto & { password?: string });
+    return this.toUserDto(user as UserDto);
   }
 
   async signup(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
@@ -54,15 +54,21 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    // const user = await this.usersService.create({
+    //   email: createUserDto.email,
+    //   firstName: createUserDto.firstName,
+    //   lastName: createUserDto.lastName,
+    //   password: hashedPassword,
+    //   role: UserRole.USER,
+    // });
+
     const user = await this.usersService.create({
-      email: createUserDto.email,
-      firstName: createUserDto.firstName,
-      lastName: createUserDto.lastName,
+      ...createUserDto,
       password: hashedPassword,
       role: UserRole.USER,
     });
 
-    return this.buildAuthResponse(this.toUserDto(user as UserDto & { password?: string }));
+    return this.buildAuthResponse(this.toUserDto(user as UserDto));
   }
 
   async signInWithCredentials(email: string, password: string): Promise<AuthResponseDto> {

@@ -1,8 +1,8 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole, type IUser } from '@my-monorepo/types';
+import { CreateUser, UserRole, type IUser } from '@my-monorepo/types';
 
-export class CreateUserDto implements Partial<IUser> {
+export class CreateUserDto implements CreateUser {
   @ApiProperty({
     example: 'john@example.com',
     description: 'User email address',
@@ -34,27 +34,31 @@ export class CreateUserDto implements Partial<IUser> {
   @IsString()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    example: 'StrongPassword123',
+    description: 'User password',
+    minLength: 6,
+  })
+  @IsString()
+  @MinLength(6)
+  // Validator, to match password and confirmPassword
+  confirmPassword: string;
+
+  @ApiProperty({
+    example: UserRole.USER,
+    enum: UserRole,
+    description: 'User role',
+  })
+  @IsEnum(UserRole)
+  role: UserRole;
 }
 
-export class UserDto implements IUser {
+// Omit confirmPassword from here
+export class UserDto extends CreateUserDto implements IUser {
   @ApiProperty({ example: 'user-uuid', description: 'User unique identifier' })
   @IsString()
   id: string;
-
-  @ApiProperty({ example: 'john@example.com', description: 'User email address' })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ example: 'John', description: 'First name of the user' })
-  @IsString()
-  firstName: string;
-
-  @ApiProperty({ example: 'Doe', description: 'Last name of the user' })
-  @IsString()
-  lastName: string;
-
-  @ApiProperty({ example: UserRole.USER, enum: UserRole, description: 'User role' })
-  role: UserRole;
 
   @ApiProperty({ example: '2024-03-05T12:34:56.789Z', description: 'User creation timestamp' })
   createdAt: Date;

@@ -4,13 +4,17 @@ export enum UserRole {
   GUEST = 'GUEST',
 }
 
-export interface IUser {
-  id?: string;
+export interface CreateUser {
   email: string;
   firstName: string;
   lastName: string;
-  password?: string;
+  password: string;
+  confirmPassword: string;
   role: UserRole;
+}
+
+export interface IUser extends Omit<CreateUser, 'confirmPassword'> {
+  id: string;
   createdAt: Date;
   updatedAt: Date;
 }

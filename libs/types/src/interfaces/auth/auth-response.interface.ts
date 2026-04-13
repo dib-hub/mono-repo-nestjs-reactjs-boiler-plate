@@ -19,11 +19,6 @@ export interface IUserSignUp extends IUserSignIn {
   lastName: string;
 }
 
-export interface IAuthResponse {
-  user: IUser;
-  accessToken: string;
-}
-
 export interface AuthenticatedRequest {
   headers: {
     authorization?: string;
