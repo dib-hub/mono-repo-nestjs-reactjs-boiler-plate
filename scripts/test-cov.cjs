@@ -64,8 +64,6 @@ async function main() {
       'api:test',
       '--skip-nx-cache',
       '--coverage',
-      '--coverageReporters=text',
-      '--coverageReporters=lcov',
     ]);
   } catch (error) {
     testError = error;

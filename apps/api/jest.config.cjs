@@ -18,6 +18,7 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   coverageDirectory: '../../coverage/apps/api',
+  coverageReporters: ['text', 'text-summary', 'lcov', 'json-summary'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/main.ts',
