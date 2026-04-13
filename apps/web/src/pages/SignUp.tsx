@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { ISignUp, IUserSignUp } from '@my-monorepo/types';
+import { ISignUp } from '@my-monorepo/types';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { Input } from '@src/components/Input';
 import { Button } from '@src/components/Button';
@@ -72,7 +72,7 @@ export const SignUp: React.FC = () => {
       setLocalError(null);
       dispatch(clearError());
 
-      const signupData: IUserSignUp = {
+      const signupData: ISignUp = {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,

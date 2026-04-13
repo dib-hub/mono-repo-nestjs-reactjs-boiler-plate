@@ -10,11 +10,13 @@ const normalizeEmail = (value: unknown): string => {
   return value.toLowerCase().trim();
 };
 
-export class VerifyResetDto implements IVerifyReset {
+export class RequestResetDto implements IRequestReset {
   @IsEmail()
   @Transform(({ value }) => normalizeEmail(value))
   email: string;
+}
 
+export class VerifyResetDto extends RequestResetDto implements IVerifyReset {
   @IsString()
   @IsNotEmpty()
   @Length(6, 6)
@@ -25,10 +27,4 @@ export class VerifyResetDto implements IVerifyReset {
   @IsNotEmpty()
   @Length(6, 50)
   password: string;
-}
-
-export class RequestResetDto implements IRequestReset {
-  @IsEmail()
-  @Transform(({ value }) => normalizeEmail(value))
-  email: string;
 }

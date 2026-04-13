@@ -5,15 +5,15 @@ import {
   IPasswordResetResponse,
   IRequestReset,
   IUser,
-  IUserSignIn,
-  IUserSignUp,
+  ISignIn,
+  ISignUp,
   IVerifyReset,
 } from '@my-monorepo/types';
 import { authInstance } from '@src/apis/initialize.instance';
 
-export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectValue: string }>(
+export const userSignUp = createAsyncThunk<IAuthResponse, ISignUp, { rejectValue: string }>(
   'auth/userSignUp',
-  async (userData: IUserSignUp, { rejectWithValue }) => {
+  async (userData: ISignUp, { rejectWithValue }) => {
     try {
       const response = await authInstance.post('signup', {
         firstName: userData.firstName,
@@ -68,9 +68,9 @@ export const getCurrentUser = createAsyncThunk<IUser, void, { rejectValue: strin
   }
 );
 
-export const userSignIn = createAsyncThunk<IAuthResponse, IUserSignIn, { rejectValue: string }>(
+export const userSignIn = createAsyncThunk<IAuthResponse, ISignIn, { rejectValue: string }>(
   'auth/userSignIn',
-  async (credentials: IUserSignIn, { rejectWithValue }) => {
+  async (credentials: ISignIn, { rejectWithValue }) => {
     try {
       const response = await authInstance.post('signin', credentials);
       if (response && response.data) {

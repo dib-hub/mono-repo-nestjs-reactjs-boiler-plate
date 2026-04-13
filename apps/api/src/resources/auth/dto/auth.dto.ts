@@ -65,45 +65,14 @@ export class UpdateUserDto implements IUpdateUser {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiPropertyOptional({
+    example: 'Password123',
+  })
+  @IsOptional()
+  @IsString()
+  password?: string;
 }
-
-// export class UserResponseDto implements Omit<IUser, 'password'> {
-//   @ApiProperty({
-//     example: 'clx9z2kq00001abc123',
-//   })
-//   id: string;
-
-//   @ApiProperty({
-//     example: 'john@example.com',
-//   })
-//   email: string;
-
-//   @ApiProperty({
-//     example: 'John',
-//   })
-//   firstName: string;
-
-//   @ApiProperty({
-//     example: 'Doe',
-//   })
-//   lastName: string;
-
-//   @ApiProperty({
-//     enum: UserRole,
-//     example: UserRole.USER,
-//   })
-//   role: UserRole;
-
-//   @ApiProperty({
-//     example: '2025-01-01T10:00:00.000Z',
-//   })
-//   createdAt: Date;
-
-//   @ApiProperty({
-//     example: '2025-01-01T10:00:00.000Z',
-//   })
-//   updatedAt: Date;
-// }
 
 export class AuthResponseDto implements IAuthResponse {
   @ApiProperty({

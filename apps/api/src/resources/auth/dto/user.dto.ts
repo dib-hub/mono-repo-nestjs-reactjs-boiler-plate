@@ -1,5 +1,5 @@
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsEnum, IsString, MinLength, Validate } from 'class-validator';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { CreateUser, UserRole, type IUser } from '@my-monorepo/types';
 
 export class CreateUserDto implements CreateUser {
@@ -42,7 +42,9 @@ export class CreateUserDto implements CreateUser {
   })
   @IsString()
   @MinLength(6)
-  // Validator, to match password and confirmPassword
+  @Validate((obj: CreateUserDto) => obj.password === obj.confirmPassword, {
+    message: 'confirmPassword must match password',
+  })
   confirmPassword: string;
 
   @ApiProperty({
@@ -55,7 +57,10 @@ export class CreateUserDto implements CreateUser {
 }
 
 // Omit confirmPassword from here
-export class UserDto extends CreateUserDto implements IUser {
+export class UserDto
+  extends OmitType(CreateUserDto, ['confirmPassword'])
+  implements Omit<IUser, 'confirmPassword'>
+{
   @ApiProperty({ example: 'user-uuid', description: 'User unique identifier' })
   @IsString()
   id: string;
