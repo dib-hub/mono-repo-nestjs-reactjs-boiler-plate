@@ -17,7 +17,7 @@ export interface ISignIn {
 export interface ISignUp extends ISignIn {
   firstName: string;
   lastName: string;
-  confirmPassword?: string;
+  confirmPassword: string;
 }
 
 export interface IGoogleAuth {

@@ -1,22 +1,13 @@
 import { IsEmail, IsNotEmpty, IsString, Length, Matches } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { IRequestReset, IVerifyReset } from '@my-monorepo/types';
+import { IResetPassword, ICompletePasswordReset } from '@my-monorepo/types';
 
-const normalizeEmail = (value: unknown): string => {
-  if (typeof value !== 'string') {
-    return '';
-  }
-
-  return value.toLowerCase().trim();
-};
-
-export class RequestResetDto implements IRequestReset {
+export class ResetPasswordDto implements IResetPassword {
   @IsEmail()
-  @Transform(({ value }) => normalizeEmail(value))
+  @IsString()
   email: string;
 }
 
-export class VerifyResetDto extends RequestResetDto implements IVerifyReset {
+export class CompletePasswordResetDto extends ResetPasswordDto implements ICompletePasswordReset {
   @IsString()
   @IsNotEmpty()
   @Length(6, 6)

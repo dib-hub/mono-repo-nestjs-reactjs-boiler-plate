@@ -6,7 +6,10 @@ import { AuthResponseDto, GoogleAuthDto, SignInDto } from '@src/resources/auth/d
 import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
-import { RequestResetDto, VerifyResetDto } from '@src/resources/auth/dto/password-reset.dto';
+import {
+  ResetPasswordDto,
+  CompletePasswordResetDto,
+} from '@src/resources/auth/dto/password-reset.dto';
 
 @Controller(REST_RESOURCE.AUTH)
 export class AuthController {
@@ -45,14 +48,14 @@ export class AuthController {
 
   @Post(REST_RESOURCE.PASSWORD_RESET + '/' + REST_RESOURCE.REQUEST)
   @Public()
-  requestPasswordReset(@Body() dto: RequestResetDto): Promise<{ message: string }> {
+  requestPasswordReset(@Body() dto: ResetPasswordDto): Promise<{ message: string }> {
     this.logger.log(`the email is ${dto.email}`);
     return this.passwordResetService.requestReset(dto.email);
   }
 
   @Post(REST_RESOURCE.PASSWORD_RESET + '/' + REST_RESOURCE.VERIFY)
   @Public()
-  verifyPasswordReset(@Body() dto: VerifyResetDto): Promise<{ message: string }> {
+  verifyPasswordReset(@Body() dto: CompletePasswordResetDto): Promise<{ message: string }> {
     return this.passwordResetService.verifyReset(dto.email, dto.otp, dto.password);
   }
 }

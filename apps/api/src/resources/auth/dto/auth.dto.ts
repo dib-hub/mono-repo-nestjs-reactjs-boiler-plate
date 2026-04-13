@@ -1,12 +1,6 @@
-import {
-  type IAuthResponse,
-  type IGoogleAuth,
-  type ISignIn,
-  type IUpdateUser,
-  UserRole,
-} from '@my-monorepo/types';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { type IAuthResponse, type IGoogleAuth, type ISignIn } from '@my-monorepo/types';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 import { UserDto } from './user.dto';
 
@@ -32,46 +26,6 @@ export class GoogleAuthDto implements IGoogleAuth {
   @IsString()
   @MinLength(1)
   idToken: string;
-}
-
-export class UpdateUserDto implements IUpdateUser {
-  @ApiPropertyOptional({
-    example: 'john@example.com',
-  })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({
-    example: 'John',
-  })
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  firstName?: string;
-
-  @ApiPropertyOptional({
-    example: 'Doe',
-  })
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  lastName?: string;
-
-  @ApiPropertyOptional({
-    enum: UserRole,
-    example: UserRole.USER,
-  })
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
-
-  @ApiPropertyOptional({
-    example: 'Password123',
-  })
-  @IsOptional()
-  @IsString()
-  password?: string;
 }
 
 export class AuthResponseDto implements IAuthResponse {

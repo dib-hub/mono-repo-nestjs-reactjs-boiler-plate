@@ -3,11 +3,11 @@ import axios from 'axios';
 import {
   IAuthResponse,
   IPasswordResetResponse,
-  IRequestReset,
+  IResetPassword,
   IUser,
   ISignIn,
   ISignUp,
-  IVerifyReset,
+  ICompletePasswordReset,
 } from '@my-monorepo/types';
 import { authInstance } from '@src/apis/initialize.instance';
 
@@ -148,7 +148,7 @@ const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
 };
 
 export const requestPasswordReset = async (
-  payload: IRequestReset
+  payload: IResetPassword
 ): Promise<IPasswordResetResponse> => {
   try {
     const response = await authInstance.post('password-reset/request', payload);
@@ -159,7 +159,7 @@ export const requestPasswordReset = async (
 };
 
 export const verifyPasswordReset = async (
-  payload: IVerifyReset
+  payload: ICompletePasswordReset
 ): Promise<IPasswordResetResponse> => {
   try {
     const response = await authInstance.post('password-reset/verify', payload);

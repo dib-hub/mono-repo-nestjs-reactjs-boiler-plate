@@ -1,8 +1,8 @@
-export interface IRequestReset {
+export interface IResetPassword {
   email: string;
 }
 
-export interface IVerifyReset extends IRequestReset {
+export interface ICompletePasswordReset extends IResetPassword {
   otp: string;
   password: string;
 }

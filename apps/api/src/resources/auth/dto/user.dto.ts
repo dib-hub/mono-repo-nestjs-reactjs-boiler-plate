@@ -1,6 +1,46 @@
-import { IsEmail, IsEnum, IsString, MinLength, Validate } from 'class-validator';
-import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { CreateUser, UserRole, type IUser } from '@my-monorepo/types';
+import { IsEmail, IsEnum, IsOptional, IsString, MinLength, Validate } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import { CreateUser, IUpdateUser, UserRole, type IUser } from '@my-monorepo/types';
+
+export class UpdateUserDto implements IUpdateUser {
+  @ApiPropertyOptional({
+    example: 'john@example.com',
+  })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional({
+    example: 'John',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  firstName?: string;
+
+  @ApiPropertyOptional({
+    example: 'Doe',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  lastName?: string;
+
+  @ApiPropertyOptional({
+    enum: UserRole,
+    example: UserRole.USER,
+  })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @ApiPropertyOptional({
+    example: 'Password123',
+  })
+  @IsOptional()
+  @IsString()
+  password?: string;
+}
 
 export class CreateUserDto implements CreateUser {
   @ApiProperty({
