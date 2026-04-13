@@ -10,6 +10,9 @@ jobs:
   quality:
     # Use a Linux runner for consistent CI behavior.
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       # Pull repository code into the runner.
@@ -52,9 +55,24 @@ jobs:
       - name: Lint
         run: pnpm exec nx run-many --target=lint --all --parallel=1 --output-style=stream --verbose
 
-      # Run tests and generate coverage output.
+      # Run tests and generate coverage output (tee preserves console log for the PR comment).
       - name: Run tests with coverage
-        run: pnpm run test:cov
+        run: |
+          set -o pipefail
+          pnpm run test:cov 2>&1 | tee ./coverage.txt
+
+      - name: Jest Coverage Comment
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/jest-coverage-comment@v1
+        with:
+          coverage-summary-path: ./coverage/apps/api/coverage-summary.json
+          title: Coverage Summary
+          summary-title: Per-File Coverage
+          badge-title: Coverage
+          hide-comment: false
+          create-new-comment: false
+          hide-summary: false
+          coverage-path: ./coverage.txt
 
       # Upload coverage only in GitHub Actions (skip local act runner).
       - name: Upload coverage report
