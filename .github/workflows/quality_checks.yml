@@ -59,7 +59,22 @@ jobs:
       - name: Run tests with coverage
         run: |
           set -o pipefail
-          pnpm run test:cov 2>&1 | tee ./coverage.txt
+          FORCE_COLOR=0 NO_COLOR=1 pnpm run test:cov 2>&1 | tee ./coverage.txt
+
+      # Extract the Jest per-file coverage table so PR comment shows full file details.
+      - name: Prepare detailed coverage report
+        if: github.event_name == 'pull_request'
+        run: |
+          sed -E 's/\x1b\[[0-9;]*[mK]//g' ./coverage.txt > ./coverage-clean.txt
+          if grep -qE '^File[[:space:]]*\|[[:space:]]*% Stmts[[:space:]]*\|' ./coverage-clean.txt; then
+            awk '
+              BEGIN { capture = 0 }
+              /^File[[:space:]]*\|[[:space:]]*% Stmts[[:space:]]*\|/ { capture = 1 }
+              capture { print }
+            ' ./coverage-clean.txt > ./coverage-report.txt
+          else
+            cp ./coverage-clean.txt ./coverage-report.txt
+          fi
 
       - name: Jest Coverage Comment
         if: github.event_name == 'pull_request'
@@ -69,10 +84,11 @@ jobs:
           title: Coverage Summary
           summary-title: Per-File Coverage
           badge-title: Coverage
+          coverage-title: Detailed Coverage Report
           hide-comment: false
           create-new-comment: false
           hide-summary: false
-          coverage-path: ./coverage.txt
+          coverage-path: ./coverage-report.txt
 
       # Upload coverage only in GitHub Actions (skip local act runner).
       - name: Upload coverage report
