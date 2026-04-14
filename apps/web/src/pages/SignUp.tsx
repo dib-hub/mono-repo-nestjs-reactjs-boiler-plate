@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { ISignUp } from '@my-monorepo/types';
+import { CreateUser, UserRole } from '@my-monorepo/types';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { Input } from '@src/components/Input';
 import { Button } from '@src/components/Button';
@@ -27,8 +27,8 @@ export const SignUp: React.FC = () => {
     }
   }, [success, user, navigate]);
 
-  const validate = useCallback((values: ISignUp): FormikErrors<ISignUp> => {
-    const errors: FormikErrors<ISignUp> = {};
+  const validate = useCallback((values: CreateUser): FormikErrors<CreateUser> => {
+    const errors: FormikErrors<CreateUser> = {};
 
     if (!values.firstName.trim()) {
       errors.firstName = 'First name is required';
@@ -66,17 +66,20 @@ export const SignUp: React.FC = () => {
       email: '',
       password: '',
       confirmPassword: '',
+      role: UserRole.USER,
     },
     validate,
     onSubmit: async (values) => {
       setLocalError(null);
       dispatch(clearError());
 
-      const signupData: ISignUp = {
+      const signupData: CreateUser = {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
+        confirmPassword: values.confirmPassword,
+        role: values.role,
       };
 
       try {

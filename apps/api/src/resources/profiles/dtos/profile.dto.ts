@@ -22,6 +22,7 @@ export class UpsertProfileDto implements IProfileFormData {
   @IsUrl()
   githubUrl?: string;
 }
+
 export class ProfileDto extends UpsertProfileDto implements IProfile {
   @ApiProperty({ example: 'profile-uuid', description: 'Profile unique identifier' })
   @IsString()

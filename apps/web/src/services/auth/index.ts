@@ -6,21 +6,16 @@ import {
   IResetPassword,
   IUser,
   ISignIn,
-  ISignUp,
   ICompletePasswordReset,
+  CreateUser,
 } from '@my-monorepo/types';
 import { authInstance } from '@src/apis/initialize.instance';
 
-export const userSignUp = createAsyncThunk<IAuthResponse, ISignUp, { rejectValue: string }>(
+export const userSignUp = createAsyncThunk<IAuthResponse, CreateUser, { rejectValue: string }>(
   'auth/userSignUp',
-  async (userData: ISignUp, { rejectWithValue }) => {
+  async (userData: CreateUser, { rejectWithValue }) => {
     try {
-      const response = await authInstance.post('signup', {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        password: userData.password,
-      });
+      const response = await authInstance.post('signup', userData);
 
       if (response && response.data) {
         return response.data as IAuthResponse;

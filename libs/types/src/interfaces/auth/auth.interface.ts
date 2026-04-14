@@ -1,12 +1,7 @@
-import { IUser, JWTUser, UserRole } from '../users';
-
-export interface JwtAuthRequest {
-  user: JWTUser;
-}
-
-export interface IAuthResponse {
-  user: IUser;
-  accessToken: string;
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+  GUEST = 'GUEST',
 }
 
 export interface ISignIn {
@@ -17,13 +12,36 @@ export interface ISignIn {
 export interface ISignUp extends ISignIn {
   firstName: string;
   lastName: string;
+  role: UserRole;
+}
+
+export interface CreateUser extends ISignUp {
   confirmPassword: string;
+}
+
+export interface IUser extends Omit<CreateUser, 'confirmPassword'> {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface JWTUser {
+  sub?: string;
+  email: string;
+  userId: string;
+}
+
+export interface JwtAuthRequest {
+  user: JWTUser;
+}
+
+export interface IAuthResponse {
+  user: IUser;
+  accessToken: string;
 }
 
 export interface IGoogleAuth {
   idToken: string;
 }
 
-export interface IUpdateUser extends Partial<Omit<ISignUp, 'confirmPassword'>> {
-  role?: UserRole;
-}
+export type IUpdateUser = Partial<ISignUp>;

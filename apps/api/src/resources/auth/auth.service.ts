@@ -2,9 +2,7 @@ import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/
 import { UsersService } from '@my-monorepo/database';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@my-monorepo/types';
-import { AuthResponseDto } from '@src/resources/auth/dto/auth.dto';
-import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import { AuthResponseDto, CreateUserDto, UserDto } from '@src/resources/auth/dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +11,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  private toUserDto(user: UserDto & { password?: string }): UserDto {
+  private toUserDto(user: UserDto): UserDto {
     const { password: _password, ...safeUser } = user;
     return safeUser as UserDto;
   }
@@ -54,10 +52,10 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    const { confirmPassword: _confirmPassword, ...userDataWithoutConfirmPassword } = createUserDto;
     const user = await this.usersService.create({
-      ...createUserDto,
+      ...userDataWithoutConfirmPassword,
       password: hashedPassword,
-      role: UserRole.USER,
     });
 
     return this.buildAuthResponse(this.toUserDto(user as UserDto));
@@ -80,6 +78,6 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
-    return this.toUserDto(user as UserDto & { password?: string });
+    return this.toUserDto(user as UserDto);
   }
 }

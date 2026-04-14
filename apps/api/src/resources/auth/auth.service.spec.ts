@@ -11,6 +11,7 @@ import { PrismaService, UsersService } from '@my-monorepo/database';
 import { AuthService } from '@src/resources/auth/auth.service';
 import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
 import { cleanUpUsers } from '@src/testUtils';
+import { UserRole } from '@my-monorepo/types';
 
 describe('AuthService', () => {
   let module: TestingModule;
@@ -23,6 +24,8 @@ describe('AuthService', () => {
     firstName: 'Test',
     lastName: 'User',
     password: 'Password123!',
+    confirmPassword: 'Password123!',
+    role: UserRole.USER,
   };
 
   beforeAll(async () => {
@@ -71,6 +74,8 @@ describe('AuthService', () => {
       firstName: 'New',
       lastName: 'User',
       password: 'Password123!',
+      confirmPassword: 'Password123!',
+      role: UserRole.USER,
     };
 
     it('hashes password, creates user, and returns a JWT', async () => {

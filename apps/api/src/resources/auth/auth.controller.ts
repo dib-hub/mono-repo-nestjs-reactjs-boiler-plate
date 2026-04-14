@@ -1,9 +1,14 @@
 import { Body, Controller, Get, Logger, Post, Req } from '@nestjs/common';
-import { IUser, REST_RESOURCE, type JwtAuthRequest } from '@my-monorepo/types';
+import { REST_RESOURCE, type JwtAuthRequest } from '@my-monorepo/types';
 import { Public } from '@src/common/guards/public.decorator';
 import { AuthService } from '@src/resources/auth/auth.service';
-import { AuthResponseDto, GoogleAuthDto, SignInDto } from '@src/resources/auth/dto/auth.dto';
-import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import {
+  AuthResponseDto,
+  CreateUserDto,
+  GoogleAuthDto,
+  SignInDto,
+  UserDto,
+} from '@src/resources/auth/dto/auth.dto';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 import {
@@ -35,7 +40,7 @@ export class AuthController {
   @Post(REST_RESOURCE.GOOGLE)
   @Public()
   async googleLogin(@Body() { idToken }: GoogleAuthDto): Promise<{
-    user: IUser;
+    user: UserDto;
     accessToken: string;
   }> {
     return await this.googleAuthService.loginWithGoogle(idToken);
