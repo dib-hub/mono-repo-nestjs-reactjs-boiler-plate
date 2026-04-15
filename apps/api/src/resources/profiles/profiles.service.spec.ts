@@ -5,6 +5,7 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService, ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
+import { LoggerService } from '@src/common/logger/logger.service';
 import { ProfilesService } from '@src/resources/profiles/profiles.service';
 import { UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
 import { cleanUpUsers, createTestUser, SeededTestUser } from '@src/testUtils';
@@ -24,7 +25,21 @@ describe('ProfilesService', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [ProfilesService, ProfilesRepoService, PrismaService],
+      providers: [
+        ProfilesService,
+        ProfilesRepoService,
+        PrismaService,
+        {
+          provide: LoggerService,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            verbose: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<ProfilesService>(ProfilesService);

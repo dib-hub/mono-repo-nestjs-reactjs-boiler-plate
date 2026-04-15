@@ -13,6 +13,7 @@ import { InternalServerErrorException, UnauthorizedException } from '@nestjs/com
 import { PrismaService } from '@my-monorepo/database';
 import { OAuth2Client } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
+import { LoggerService } from '@src/common/logger/logger.service';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 import { cleanUpUsers, createTestUser } from '@src/testUtils';
 
@@ -22,6 +23,13 @@ describe('GoogleAuthService', () => {
   let prisma: PrismaService;
   let mockVerifyIdToken: jest.Mock;
   let jwtService: { signAsync: jest.Mock };
+  let loggerService: {
+    log: jest.Mock;
+    error: jest.Mock;
+    warn: jest.Mock;
+    debug: jest.Mock;
+    verbose: jest.Mock;
+  };
   const userIdsToClean: string[] = [];
 
   beforeAll(async () => {
@@ -33,9 +41,21 @@ describe('GoogleAuthService', () => {
     }));
 
     jwtService = { signAsync: jest.fn().mockResolvedValue('jwt-token') };
+    loggerService = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      verbose: jest.fn(),
+    };
 
     module = await Test.createTestingModule({
-      providers: [GoogleAuthService, PrismaService, { provide: JwtService, useValue: jwtService }],
+      providers: [
+        GoogleAuthService,
+        PrismaService,
+        { provide: JwtService, useValue: jwtService },
+        { provide: LoggerService, useValue: loggerService },
+      ],
     }).compile();
 
     service = module.get<GoogleAuthService>(GoogleAuthService);
@@ -68,7 +88,8 @@ describe('GoogleAuthService', () => {
         () =>
           new GoogleAuthService(
             prisma as unknown as PrismaService,
-            jwtService as unknown as JwtService
+            jwtService as unknown as JwtService,
+            loggerService as unknown as LoggerService
           )
       ).toThrow(InternalServerErrorException);
 

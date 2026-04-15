@@ -8,6 +8,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException } from '@nestjs/common';
 import { PrismaService, ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
+import { LoggerService } from '@src/common/logger/logger.service';
 import { ProfilesController } from '@src/resources/profiles/profiles.controller';
 import { ProfilesService } from '@src/resources/profiles/profiles.service';
 import { UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
@@ -24,13 +25,27 @@ describe('ProfilesController', () => {
     name: 'New Controller Profile',
     email: 'ctrl-new@example.com',
     linkedInUrl: 'https://linkedin.com/in/ctrl',
-    githubUrl: null,
+    githubUrl: 'https://github.com/ctrl',
   };
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       controllers: [ProfilesController],
-      providers: [ProfilesService, ProfilesRepoService, PrismaService],
+      providers: [
+        ProfilesService,
+        ProfilesRepoService,
+        PrismaService,
+        {
+          provide: LoggerService,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            verbose: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<ProfilesController>(ProfilesController);

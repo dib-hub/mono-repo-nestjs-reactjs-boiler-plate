@@ -8,8 +8,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
+import { LoggerService } from '@src/common/logger/logger.service';
 import { AuthService } from '@src/resources/auth/auth.service';
-import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/auth.dto';
 import { cleanUpUsers } from '@src/testUtils';
 import { UserRole } from '@my-monorepo/types';
 
@@ -37,6 +38,16 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: { sign: jest.fn().mockReturnValue('mock-jwt-token') },
+        },
+        {
+          provide: LoggerService,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            verbose: jest.fn(),
+          },
         },
       ],
     }).compile();

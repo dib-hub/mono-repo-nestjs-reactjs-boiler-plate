@@ -1,17 +1,18 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
+  Injectable,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { LoggerService } from '@src/common/logger/logger.service';
 
-// Catch ALL exceptions, not just HttpException
 @Catch()
+@Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  constructor(private readonly logger: LoggerService) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -20,8 +21,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const status =
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     let message: unknown;
+
     if (exception instanceof HttpException) {
       const exceptionResponse = exception.getResponse();
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (
@@ -40,10 +43,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     this.logger.error(
-      `❌ [${status}] ${JSON.stringify(message)} | ${exception instanceof Error ? exception.stack : ''}`
+      `Unhandled exception [${status}]: ${JSON.stringify(message)}`,
+      exception instanceof Error ? exception.stack : undefined,
+      AllExceptionsFilter.name
     );
 
-    // Send JSON response
     response.status(status).json({
       success: false,
       statusCode: status,

@@ -1,4 +1,4 @@
-import { FC, memo } from 'react';
+import { FC, ReactNode, memo } from 'react';
 
 interface InputProps {
   type?: string;
@@ -10,6 +10,7 @@ interface InputProps {
   name?: string;
   required?: boolean;
   disabled?: boolean;
+  endAdornment?: ReactNode;
 }
 
 export const Input: FC<InputProps> = memo(
@@ -23,8 +24,9 @@ export const Input: FC<InputProps> = memo(
     name = '',
     required = false,
     disabled = false,
+    endAdornment,
   }) => {
-    return (
+    const input = (
       <input
         type={type}
         placeholder={placeholder}
@@ -34,8 +36,21 @@ export const Input: FC<InputProps> = memo(
         name={name}
         required={required}
         disabled={disabled}
-        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition disabled:opacity-50 disabled:cursor-not-allowed ${
+          endAdornment ? 'pr-14' : ''
+        } ${className}`}
       />
+    );
+
+    if (!endAdornment) {
+      return input;
+    }
+
+    return (
+      <div className="relative">
+        {input}
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3">{endAdornment}</div>
+      </div>
     );
   }
 );

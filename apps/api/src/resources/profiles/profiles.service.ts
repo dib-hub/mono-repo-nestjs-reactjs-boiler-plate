@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
+import { LoggerService } from '@src/common/logger/logger.service';
 import { ProfileDto, UpsertProfileDto } from '@src/resources/profiles/dtos/profile.dto';
 
 @Injectable()
 export class ProfilesService {
-  constructor(private readonly profilesRepoService: ProfilesRepoService) {}
+  constructor(
+    private readonly profilesRepoService: ProfilesRepoService,
+    private readonly logger: LoggerService
+  ) {}
 
   async getProfileByUserId(userId: string): Promise<ProfileDto> {
+    this.logger.log('Fetching profile by user id', ProfilesService.name);
     return (await this.profilesRepoService.getProfile({
       where: { userId },
       select: {
@@ -23,6 +28,7 @@ export class ProfilesService {
   }
 
   async upsertProfile(userId: string, dto: UpsertProfileDto): Promise<ProfileDto> {
+    this.logger.log('Upserting profile data', ProfilesService.name);
     return (await this.profilesRepoService.upsertProfile({
       where: { userId },
       create: {

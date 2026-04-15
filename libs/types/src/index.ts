@@ -5,5 +5,5 @@ export * from './interfaces/rest-resource';
 export * from './interfaces/jest';
 export * from './interfaces/auth';
 export * from './interfaces/ui';
-export * from './interfaces/password-reset';
 export * from './interfaces/routes';
+export * from './interfaces/error-alert';

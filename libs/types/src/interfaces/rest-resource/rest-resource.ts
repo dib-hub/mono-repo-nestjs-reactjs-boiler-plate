@@ -9,6 +9,7 @@ export const REST_RESOURCE = {
   PROFILES: 'profiles',
   REQUEST: 'request',
   VERIFY: 'verify',
+  COMPLETE: 'complete',
   PASSWORD_RESET: 'password-reset',
   GOOGLE: 'google',
 };

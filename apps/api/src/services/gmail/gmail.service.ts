@@ -1,14 +1,14 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { google } from 'googleapis';
+import { LoggerService } from '@src/common/logger/logger.service';
 
 @Injectable()
 export class GmailService {
   private static readonly REQUIRED_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
 
-  private readonly logger = new Logger(GmailService.name);
   private gmail;
 
-  constructor() {
+  constructor(private readonly logger: LoggerService) {
     const googleClientId = process.env['GOOGLE_CLIENT_ID'];
     const googleClientSecret = process.env['GOOGLE_CLIENT_SECRET'];
     const googleRedirectUri = process.env['GOOGLE_REDIRECT_URI'];
@@ -37,6 +37,7 @@ export class GmailService {
   }
 
   async sendEmail(to: string, subject: string, html: string): Promise<void> {
+    this.logger.log('Sending email through Gmail API', GmailService.name);
     const sender = process.env['MAIL_SENDER_EMAIL'];
 
     const messageParts = [
@@ -64,7 +65,7 @@ export class GmailService {
         },
       });
 
-      this.logger.log(`Email sent to ${to}`);
+      this.logger.log(`Email sent to ${to}`, GmailService.name);
     } catch (error) {
       const err = error as {
         code?: number;
@@ -74,7 +75,7 @@ export class GmailService {
 
       const message = err.response?.data?.error?.message ?? err.message ?? 'Unknown Gmail error';
 
-      this.logger.error(`Failed to send email: ${message}`);
+      this.logger.error(`Failed to send email: ${message}`, undefined, GmailService.name);
 
       if (
         err.code === 403 &&
@@ -89,14 +90,17 @@ export class GmailService {
     }
   }
 
-  async sendOtpEmail(to: string, otp: string): Promise<void> {
-    const subject = 'Password Reset OTP';
+  async sendPasswordResetLinkEmail(to: string, resetUrl: string): Promise<void> {
+    this.logger.log('Sending password reset email', GmailService.name);
+    const subject = 'Reset your password';
 
     const html = `
-      <h3>Password Reset</h3>
-      <p>Your OTP code is:</p>
-      <h2>${otp}</h2>
-      <p>This code will expire in 10 minutes.</p>
+      <h3>Password Reset Request</h3>
+      <p>We received a request to reset your password.</p>
+      <p>Click the link below to set a new password:</p>
+      <p><a href="${resetUrl}">Reset Password</a></p>
+      <p>This link will expire in 10 minutes.</p>
+      <p>If you did not request this, you can safely ignore this email.</p>
     `;
 
     await this.sendEmail(to, subject, html);

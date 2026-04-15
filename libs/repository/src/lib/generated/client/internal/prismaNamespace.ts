@@ -701,7 +701,7 @@ export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeo
 export const PasswordResetScalarFieldEnum = {
   id: 'id',
   email: 'email',
-  otp: 'otp',
+  token: 'token',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 } as const

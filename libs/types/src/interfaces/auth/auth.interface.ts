@@ -45,3 +45,20 @@ export interface IGoogleAuth {
 }
 
 export type IUpdateUser = Partial<ISignUp>;
+
+export type IRequestPasswordReset = Omit<ISignIn, 'password'>;
+
+export interface IValidatePasswordResetToken {
+  token: string;
+}
+
+export interface ICompletePasswordReset extends IValidatePasswordResetToken {
+  password: string;
+  confirmPassword: string;
+}
+
+export interface IPasswordResetResponse {
+  message: string;
+}
+
+export type ValidPasswordRecord = Partial<IUser>;

@@ -10,11 +10,19 @@ jest.mock('googleapis', () => ({
 import { InternalServerErrorException } from '@nestjs/common';
 import { google } from 'googleapis';
 
+import { LoggerService } from '@src/common/logger/logger.service';
 import { GmailService } from '@src/services/gmail/gmail.service';
 
 describe('GmailService', () => {
   let service: GmailService;
   let mockSend: jest.Mock;
+  let loggerService: {
+    log: jest.Mock;
+    error: jest.Mock;
+    warn: jest.Mock;
+    debug: jest.Mock;
+    verbose: jest.Mock;
+  };
 
   const validEnv = {
     GOOGLE_CLIENT_ID: 'client-id',
@@ -35,8 +43,15 @@ describe('GmailService', () => {
     (google.gmail as unknown as jest.Mock).mockReturnValue({
       users: { messages: { send: mockSend } },
     });
+    loggerService = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      verbose: jest.fn(),
+    };
 
-    service = new GmailService();
+    service = new GmailService(loggerService as unknown as LoggerService);
   });
 
   afterEach(() => {
@@ -50,22 +65,30 @@ describe('GmailService', () => {
   describe('constructor', () => {
     it('should throw InternalServerErrorException when GOOGLE_CLIENT_ID is missing', () => {
       delete process.env['GOOGLE_CLIENT_ID'];
-      expect(() => new GmailService()).toThrow(InternalServerErrorException);
+      expect(() => new GmailService(loggerService as unknown as LoggerService)).toThrow(
+        InternalServerErrorException
+      );
     });
 
     it('should throw InternalServerErrorException when GOOGLE_CLIENT_SECRET is missing', () => {
       delete process.env['GOOGLE_CLIENT_SECRET'];
-      expect(() => new GmailService()).toThrow(InternalServerErrorException);
+      expect(() => new GmailService(loggerService as unknown as LoggerService)).toThrow(
+        InternalServerErrorException
+      );
     });
 
     it('should throw InternalServerErrorException when GOOGLE_REDIRECT_URI is missing', () => {
       delete process.env['GOOGLE_REDIRECT_URI'];
-      expect(() => new GmailService()).toThrow(InternalServerErrorException);
+      expect(() => new GmailService(loggerService as unknown as LoggerService)).toThrow(
+        InternalServerErrorException
+      );
     });
 
     it('should throw InternalServerErrorException when GOOGLE_REFRESH_TOKEN is missing', () => {
       delete process.env['GOOGLE_REFRESH_TOKEN'];
-      expect(() => new GmailService()).toThrow(InternalServerErrorException);
+      expect(() => new GmailService(loggerService as unknown as LoggerService)).toThrow(
+        InternalServerErrorException
+      );
     });
   });
 
@@ -124,21 +147,6 @@ describe('GmailService', () => {
       await expect(service.sendEmail('to@example.com', 'Subject', '<p>Hello</p>')).rejects.toThrow(
         InternalServerErrorException
       );
-    });
-  });
-
-  describe('sendOtpEmail', () => {
-    it('should call sendEmail with password reset subject and OTP in body', async () => {
-      mockSend.mockResolvedValue({});
-
-      await service.sendOtpEmail('to@example.com', '123456');
-
-      expect(mockSend).toHaveBeenCalledTimes(1);
-      const call = mockSend.mock.calls[0][0] as { requestBody: { raw: string } };
-      // Restore URL-safe base64 to standard before decoding
-      const standardBase64 = call.requestBody.raw.replace(/-/g, '+').replace(/_/g, '/');
-      const decoded = Buffer.from(standardBase64, 'base64').toString('utf-8');
-      expect(decoded).toContain('123456');
     });
   });
 });

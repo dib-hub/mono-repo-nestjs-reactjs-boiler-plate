@@ -1,35 +1,69 @@
-import { FC, FormEvent, useCallback, useMemo, useState } from 'react';
+import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { AnimatedErrorAlert } from '@src/components/AnimatedErrorAlert';
 import { Button } from '@src/components/Button';
 import { Input } from '@src/components/Input';
-import { verifyPasswordReset } from '@src/services/auth';
+import { completePasswordReset, validatePasswordResetToken } from '@src/services/auth';
 
 const decorationIndices = Array.from({ length: 9 }, (_, i) => i);
 
 export const ResetPassword: FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [email, setEmail] = useState(searchParams.get('email') ?? '');
-  const [otp, setOtp] = useState('');
+  const token = useMemo(() => searchParams.get('token') ?? '', [searchParams]);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validatingToken, setValidatingToken] = useState(true);
+  const [tokenValidated, setTokenValidated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Clear error states on component unmount
+  useEffect(() => {
+    return () => {
+      setError(null);
+      setSuccess(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    const validateToken = async (): Promise<void> => {
+      if (!token) {
+        setError('Reset link is invalid or missing a token');
+        setTokenValidated(false);
+        setValidatingToken(false);
+        return;
+      }
+
+      setValidatingToken(true);
+      setError(null);
+
+      try {
+        await validatePasswordResetToken({ token });
+        setTokenValidated(true);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Reset link is invalid or expired.');
+        }
+        setTokenValidated(false);
+      } finally {
+        setValidatingToken(false);
+      }
+    };
+
+    void validateToken();
+  }, [token]);
 
   const handleSubmit = useCallback(
     async (e: FormEvent): Promise<void> => {
       e.preventDefault();
-      const normalizedEmail = email.trim().toLowerCase();
-      const normalizedOtp = otp.trim();
 
-      if (!normalizedEmail) {
-        setError('Email is required');
-        return;
-      }
-
-      if (!/^\d{6}$/.test(normalizedOtp)) {
-        setError('OTP must be a 6-digit number');
+      if (!tokenValidated) {
+        setError('Reset link is invalid or expired.');
         return;
       }
 
@@ -47,10 +81,10 @@ export const ResetPassword: FC = () => {
       setError(null);
 
       try {
-        await verifyPasswordReset({
-          email: normalizedEmail,
-          otp: normalizedOtp,
+        await completePasswordReset({
+          token,
           password,
+          confirmPassword,
         });
 
         setSuccess(true);
@@ -68,17 +102,18 @@ export const ResetPassword: FC = () => {
         setLoading(false);
       }
     },
-    [confirmPassword, email, navigate, otp, password]
+    [confirmPassword, navigate, password, token, tokenValidated]
   );
 
   const isDisabled = useMemo(
     () =>
       loading ||
-      !email.trim() ||
-      !/^\d{6}$/.test(otp.trim()) ||
+      validatingToken ||
+      !tokenValidated ||
+      !token ||
       !password ||
       password !== confirmPassword,
-    [confirmPassword, email, loading, otp, password]
+    [confirmPassword, loading, password, token, tokenValidated, validatingToken]
   );
 
   const passwordMismatch = useMemo(
@@ -94,14 +129,8 @@ export const ResetPassword: FC = () => {
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-2">DibHub</h1>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Reset password</h2>
-            <p className="text-gray-600">Enter your email, OTP, and new password.</p>
+            <p className="text-gray-600">Enter and confirm your new password.</p>
           </div>
-
-          {error && !success && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700">
-              {error}
-            </div>
-          )}
 
           {!success ? (
             <form
@@ -111,33 +140,9 @@ export const ResetPassword: FC = () => {
               className="space-y-4"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">OTP</label>
-                <Input
-                  type="text"
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  disabled={loading}
-                  required
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                 <Input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter new password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -151,7 +156,7 @@ export const ResetPassword: FC = () => {
                   Confirm Password
                 </label>
                 <Input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Confirm password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -160,11 +165,22 @@ export const ResetPassword: FC = () => {
                 />
               </div>
 
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={(e) => setShowPassword(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <span>Show password</span>
+              </label>
+
               {passwordMismatch && <p className="text-red-600 text-sm">Passwords do not match</p>}
 
               <Button type="submit" disabled={isDisabled}>
                 {loading ? 'Updating password...' : 'Reset password'}
               </Button>
+              <AnimatedErrorAlert message={error} />
             </form>
           ) : (
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
@@ -178,6 +194,10 @@ export const ResetPassword: FC = () => {
                 <Button>Go to sign in</Button>
               </Link>
             </div>
+          )}
+
+          {validatingToken && !success && (
+            <p className="mt-4 text-sm text-gray-600">Validating reset link...</p>
           )}
         </div>
 

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '@my-monorepo/database';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import * as crypto from 'crypto';
+import { LoggerService } from '@src/common/logger/logger.service';
 import { GmailService } from '@src/services/gmail/gmail.service';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 import {
@@ -14,14 +16,14 @@ describe('PasswordResetService', () => {
   let module: TestingModule;
   let service: PasswordResetService;
   let prisma: PrismaService;
-  let gmailService: { sendOtpEmail: jest.Mock; sendEmail: jest.Mock };
+  let gmailService: { sendPasswordResetLinkEmail: jest.Mock; sendEmail: jest.Mock };
   let seededUser: SeededTestUser;
   const userIdsToClean: string[] = [];
   const emailsToClean: string[] = [];
 
   beforeAll(async () => {
     gmailService = {
-      sendOtpEmail: jest.fn(),
+      sendPasswordResetLinkEmail: jest.fn(),
       sendEmail: jest.fn(),
     };
 
@@ -30,6 +32,16 @@ describe('PasswordResetService', () => {
         PasswordResetService,
         PrismaService,
         { provide: GmailService, useValue: gmailService },
+        {
+          provide: LoggerService,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            verbose: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -55,84 +67,140 @@ describe('PasswordResetService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    gmailService.sendOtpEmail.mockResolvedValue(undefined);
+    jest.spyOn(crypto, 'randomBytes').mockImplementation(
+      ((size: number) => Buffer.from('a'.repeat(size * 2), 'hex')) as typeof crypto.randomBytes
+    );
+    gmailService.sendPasswordResetLinkEmail.mockResolvedValue(undefined);
   });
 
-  it('requestReset should throw when user does not exist', async () => {
-    await expect(service.requestReset('missing@example.com')).rejects.toThrow(BadRequestException);
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  it('requestReset should store otp and send email when user exists', async () => {
-    const result = await service.requestReset(seededUser.email);
+  it('requestPasswordReset should return a generic message when user does not exist', async () => {
+    const result = await service.requestPasswordReset('missing@example.com');
 
-    expect(result).toEqual({ message: 'OTP sent to your email' });
-    expect(gmailService.sendOtpEmail).toHaveBeenCalledTimes(1);
-    expect(gmailService.sendOtpEmail).toHaveBeenCalledWith(
+    expect(result).toEqual({
+      message: 'If an account exists for this email, a reset link has been sent.',
+    });
+    expect(gmailService.sendPasswordResetLinkEmail).not.toHaveBeenCalled();
+  });
+
+  it('requestPasswordReset should store token hash and send reset link when user exists', async () => {
+    const result = await service.requestPasswordReset(seededUser.email);
+
+    expect(result).toEqual({
+      message: 'If an account exists for this email, a reset link has been sent.',
+    });
+    expect(gmailService.sendPasswordResetLinkEmail).toHaveBeenCalledTimes(1);
+    expect(gmailService.sendPasswordResetLinkEmail).toHaveBeenCalledWith(
       seededUser.email,
-      expect.stringMatching(/^\d{6}$/)
+      expect.stringContaining('/reset-password?token=')
     );
 
-    // Verify the OTP record was persisted
     const record = await prisma.passwordReset.findUnique({
       where: { email: seededUser.email },
     });
     expect(record).not.toBeNull();
-    expect(record!.otp).toMatch(/^\d{6}$/);
+    expect(record!.token).toHaveLength(64);
   });
 
-  it('requestReset should throw InternalServerErrorException when email sending fails', async () => {
-    gmailService.sendOtpEmail.mockRejectedValue(new Error('gmail error'));
+  it('requestPasswordReset should throw InternalServerErrorException when email sending fails', async () => {
+    gmailService.sendPasswordResetLinkEmail.mockRejectedValue(new Error('gmail error'));
 
-    await expect(service.requestReset(seededUser.email)).rejects.toThrow(
+    await expect(service.requestPasswordReset(seededUser.email)).rejects.toThrow(
       InternalServerErrorException
     );
   });
 
-  it('verifyReset should throw for missing reset record', async () => {
-    await expect(
-      service.verifyReset('no-record@example.com', '123456', 'newPassword123')
-    ).rejects.toThrow(BadRequestException);
+  it('validateResetToken should throw for missing reset record', async () => {
+    await expect(service.validateResetToken('invalid-token')).rejects.toThrow(BadRequestException);
   });
 
-  it('verifyReset should throw for invalid otp', async () => {
-    // Ensure a reset record exists
-    await service.requestReset(seededUser.email);
+  it('validateResetToken should throw for expired token', async () => {
+    const token = 'expired-token';
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-    await expect(service.verifyReset(seededUser.email, '000000', 'newPassword123')).rejects.toThrow(
-      BadRequestException
-    );
-  });
-
-  it('verifyReset should throw for expired otp', async () => {
-    // Insert an expired OTP directly
     await prisma.passwordReset.upsert({
       where: { email: seededUser.email },
-      update: { otp: '999999', expiresAt: new Date(Date.now() - 1000) },
+      update: { token: tokenHash, expiresAt: new Date(Date.now() - 1000) },
       create: {
         email: seededUser.email,
-        otp: '999999',
+        token: tokenHash,
         expiresAt: new Date(Date.now() - 1000),
       },
     });
 
-    await expect(service.verifyReset(seededUser.email, '999999', 'newPassword123')).rejects.toThrow(
-      BadRequestException
-    );
+    await expect(service.validateResetToken(token)).rejects.toThrow(BadRequestException);
   });
 
-  it('verifyReset should update password and delete otp record for valid otp', async () => {
-    const otp = '654321';
+  it('validateResetToken should return success for valid token', async () => {
+    const token = 'valid-token-for-check';
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
     await prisma.passwordReset.upsert({
       where: { email: seededUser.email },
-      update: { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
+      update: { token: tokenHash, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
       create: {
         email: seededUser.email,
-        otp,
+        token: tokenHash,
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       },
     });
 
-    const result = await service.verifyReset(seededUser.email, otp, 'newPassword123');
+    await expect(service.validateResetToken(token)).resolves.toEqual({
+      message: 'Reset token is valid',
+    });
+  });
+
+  it('completePasswordReset should throw for missing reset record', async () => {
+    await expect(service.completePasswordReset('invalid-token', 'newPassword123')).rejects.toThrow(
+      BadRequestException
+    );
+  });
+
+  it('completePasswordReset should throw for invalid token', async () => {
+    await service.requestPasswordReset(seededUser.email);
+
+    await expect(service.completePasswordReset('wrong-token', 'newPassword123')).rejects.toThrow(
+      BadRequestException
+    );
+  });
+
+  it('completePasswordReset should throw for expired token', async () => {
+    const token = 'expired-token';
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    await prisma.passwordReset.upsert({
+      where: { email: seededUser.email },
+      update: { token: tokenHash, expiresAt: new Date(Date.now() - 1000) },
+      create: {
+        email: seededUser.email,
+        token: tokenHash,
+        expiresAt: new Date(Date.now() - 1000),
+      },
+    });
+
+    await expect(service.completePasswordReset(token, 'newPassword123')).rejects.toThrow(
+      BadRequestException
+    );
+  });
+
+  it('completePasswordReset should update password and delete token record for valid token', async () => {
+    const token = 'valid-token';
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    await prisma.passwordReset.upsert({
+      where: { email: seededUser.email },
+      update: { token: tokenHash, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
+      create: {
+        email: seededUser.email,
+        token: tokenHash,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      },
+    });
+
+    const result = await service.completePasswordReset(token, 'newPassword123');
 
     expect(result).toEqual({ message: 'Password updated' });
 
