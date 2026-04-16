@@ -21,8 +21,8 @@ module.exports = composePlugins(withNx(), (config) => {
   // Override externals: bundle workspace libs, externalize all real node_modules
   config.externals = [
     function ({ request }, callback) {
-      // Bundle workspace libs (they resolve via alias above)
-      if (request.startsWith('@my-monorepo/')) {
+      // Bundle workspace libs and local path aliases (they resolve via alias above)
+      if (request.startsWith('@my-monorepo/') || request.startsWith('@src/')) {
         return callback();
       }
       // Externalize everything else that looks like a package (not a relative/absolute path)
