@@ -27,7 +27,8 @@ pnpm install
 npm install
 ```
 
-This installs all dependencies defined in the root `package.json`. Dependencies are shared across all applications and libraries in the monorepo.
+This installs all dependencies defined in the root `package.json`. Dependencies
+are shared across all applications and libraries in the monorepo.
 
 ### 3. Setup Environment Variables
 
@@ -40,7 +41,7 @@ cp .env.example .env
 Edit `.env` and adjust values for your local setup:
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/myapp_dev?schema=public
+DATABASE_URL=postgresql://postgres:postgres@localhost:5434/myapp_dev?schema=public
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:4200
@@ -78,7 +79,8 @@ This generates the Prisma client from the schema defined in `libs/repository/pri
 pnpm db:migrate
 ```
 
-This creates database tables based on the Prisma schema. You'll be prompted to name the migration (e.g., "init").
+This creates database tables based on the Prisma schema. You'll be prompted
+to name the migration (e.g., "init").
 
 #### (Optional) Seed the Database
 
@@ -92,7 +94,7 @@ This runs the seed script in `libs/repository/prisma/seed.ts` to populate test d
 
 Open three terminal windows:
 
-**Terminal 1: Start the API**
+#### Terminal 1: Start the API
 
 ```bash
 pnpm nx serve api
@@ -100,7 +102,7 @@ pnpm nx serve api
 
 You should see:
 
-```
+```text
 🚀 Server is running on http://localhost:3000/api
 ```
 
@@ -119,7 +121,7 @@ Expected response:
 }
 ```
 
-**Terminal 2: Start the Web App**
+#### Terminal 2: Start the Web App
 
 ```bash
 pnpm nx serve web
@@ -127,7 +129,7 @@ pnpm nx serve web
 
 You should see Vite starting on port 4200.
 
-**Terminal 3: Run Tests (Optional)**
+#### Terminal 3: Run Tests (Optional)
 
 ```bash
 pnpm test
@@ -135,13 +137,13 @@ pnpm test
 
 ### 7. Access the Applications
 
-- **Frontend**: http://localhost:4200
-- **API Health**: http://localhost:3000/api/health
+- **Frontend**: <http://localhost:4200>
+- **API Health**: <http://localhost:3000/api/health>
 - **Prisma Studio** (visual DB tool): `pnpm db:studio`
 
 ## Project Structure Walkthrough
 
-```
+```text
 monorepo-template/
 ├── apps/
 │   ├── api/              # NestJS backend application
@@ -292,10 +294,10 @@ chmod +x scripts/*.sh
 
 ### Useful Resources
 
-- **NX Guide**: https://nx.dev/getting-started
-- **NestJS Tutorial**: https://docs.nestjs.com
-- **React Guide**: https://react.dev/learn
-- **Prisma Guide**: https://www.prisma.io/docs/getting-started
+- **NX Guide**: <https://nx.dev/getting-started>
+- **NestJS Tutorial**: <https://docs.nestjs.com>
+- **React Guide**: <https://react.dev/learn>
+- **Prisma Guide**: <https://www.prisma.io/docs/getting-started>
 
 ## Docker Cheat Sheet
 
