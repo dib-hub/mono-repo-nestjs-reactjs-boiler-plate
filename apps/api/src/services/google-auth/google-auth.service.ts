@@ -5,17 +5,17 @@ import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '@my-monorepo/database';
 import { IUser } from '@my-monorepo/types';
-import { LoggerService } from '@src/common/logger/logger.service';
+import { TraceLogger } from '@src/common/logger/logger.service';
 
 @Injectable()
 export class GoogleAuthService {
   private readonly client: OAuth2Client;
   private readonly googleClientId: string;
+  private readonly logger = new TraceLogger(GoogleAuthService.name);
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-    private readonly logger: LoggerService
+    private readonly jwtService: JwtService
   ) {
     const googleClientId = process.env['GOOGLE_CLIENT_ID'];
 
@@ -34,7 +34,7 @@ export class GoogleAuthService {
     picture?: string;
     googleId: string;
   }> {
-    this.logger.log('Verifying Google identity token', GoogleAuthService.name);
+    this.logger.log('Verifying Google identity token');
     const ticket = await this.client.verifyIdToken({
       idToken,
       audience: this.googleClientId,
@@ -62,7 +62,7 @@ export class GoogleAuthService {
     user: IUser;
     accessToken: string;
   }> {
-    this.logger.log('Authenticating user with Google', GoogleAuthService.name);
+    this.logger.log('Authenticating user with Google');
     const googleUser = await this.verifyGoogleUser(idToken);
 
     let user = await this.prisma.user.findUnique({
@@ -70,7 +70,7 @@ export class GoogleAuthService {
     });
 
     if (!user) {
-      this.logger.log('Creating a new Google-backed user account', GoogleAuthService.name);
+      this.logger.log('Creating a new Google-backed user account');
       const oauthPasswordHash = await bcrypt.hash(randomUUID(), 10);
 
       user = await this.prisma.user.create({

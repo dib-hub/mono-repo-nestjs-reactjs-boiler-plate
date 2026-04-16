@@ -1,25 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from '@src/app/app.service';
-import { LoggerService } from '@src/common/logger/logger.service';
 
 describe('AppService', () => {
   let service: AppService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AppService,
-        {
-          provide: LoggerService,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
-            warn: jest.fn(),
-            debug: jest.fn(),
-            verbose: jest.fn(),
-          },
-        },
-      ],
+      providers: [AppService],
     }).compile();
 
     service = module.get<AppService>(AppService);

@@ -3,7 +3,6 @@ import { BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
 import { AuthController } from '@src/resources/auth/auth.controller';
-import { LoggerService } from '@src/common/logger/logger.service';
 import { AuthService } from '@src/resources/auth/auth.service';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
@@ -22,13 +21,6 @@ describe('AuthController', () => {
     validateResetToken: jest.Mock;
     completePasswordReset: jest.Mock;
   };
-  let loggerService: {
-    log: jest.Mock;
-    error: jest.Mock;
-    warn: jest.Mock;
-    debug: jest.Mock;
-    verbose: jest.Mock;
-  };
   const userIdsToClean: string[] = [];
   const dto: CreateUserDto = {
     email: 'auth-ctrl-test@example.com',
@@ -46,13 +38,6 @@ describe('AuthController', () => {
       validateResetToken: jest.fn(),
       completePasswordReset: jest.fn(),
     };
-    loggerService = {
-      log: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      verbose: jest.fn(),
-    };
 
     module = await Test.createTestingModule({
       controllers: [AuthController],
@@ -63,7 +48,6 @@ describe('AuthController', () => {
         { provide: JwtService, useValue: { sign: jest.fn().mockReturnValue('mock-jwt-token') } },
         { provide: GoogleAuthService, useValue: googleAuthService },
         { provide: PasswordResetService, useValue: passwordResetService },
-        { provide: LoggerService, useValue: loggerService },
       ],
     }).compile();
 
@@ -176,13 +160,6 @@ describe('AuthController (password reset) — unit tests', () => {
     validateResetToken: jest.Mock;
     completePasswordReset: jest.Mock;
   };
-  let loggerService: {
-    log: jest.Mock;
-    error: jest.Mock;
-    warn: jest.Mock;
-    debug: jest.Mock;
-    verbose: jest.Mock;
-  };
 
   beforeEach(() => {
     passwordResetService = {
@@ -190,20 +167,12 @@ describe('AuthController (password reset) — unit tests', () => {
       validateResetToken: jest.fn(),
       completePasswordReset: jest.fn(),
     };
-    loggerService = {
-      log: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      verbose: jest.fn(),
-    };
 
     // Pure unit test: dummy dependencies, only passwordResetService is used.
     controller = new AuthController(
       {} as unknown as AuthService,
       {} as unknown as GoogleAuthService,
-      passwordResetService as unknown as PasswordResetService,
-      loggerService as unknown as LoggerService
+      passwordResetService as unknown as PasswordResetService
     );
   });
 

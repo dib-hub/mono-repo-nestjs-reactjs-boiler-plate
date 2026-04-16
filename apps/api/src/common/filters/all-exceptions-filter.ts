@@ -7,12 +7,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { LoggerService } from '@src/common/logger/logger.service';
+import { TraceLogger } from '@src/common/logger/logger.service';
 
 @Catch()
 @Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private readonly logger: LoggerService) {}
+  private readonly logger = new TraceLogger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -44,8 +44,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     this.logger.error(
       `Unhandled exception [${status}]: ${JSON.stringify(message)}`,
-      exception instanceof Error ? exception.stack : undefined,
-      AllExceptionsFilter.name
+      exception instanceof Error ? exception.stack : undefined
     );
 
     response.status(status).json({

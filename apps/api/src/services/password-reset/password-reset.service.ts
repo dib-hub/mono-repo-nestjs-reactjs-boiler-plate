@@ -7,20 +7,21 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { LoggerService } from '@src/common/logger/logger.service';
+import { TraceLogger } from '@src/common/logger/logger.service';
 import { GmailService } from '@src/services/gmail/gmail.service';
 import { ValidPasswordRecord } from '@my-monorepo/types';
 
 @Injectable()
 export class PasswordResetService {
+  private readonly logger = new TraceLogger(PasswordResetService.name);
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly gmailService: GmailService,
-    private readonly logger: LoggerService
+    private readonly gmailService: GmailService
   ) {}
 
   private buildResetPasswordUrl(token: string): string {
-    this.logger.log('Building password reset URL', PasswordResetService.name);
+    this.logger.log('Building password reset URL');
     const configuredBaseUrl =
       process.env['PASSWORD_RESET_URL'] ??
       process.env['APP_WEB_URL'] ??
@@ -36,7 +37,7 @@ export class PasswordResetService {
   }
 
   private getTokenHash(token: string): string {
-    this.logger.log('Hashing password reset token', PasswordResetService.name);
+    this.logger.log('Hashing password reset token');
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
@@ -61,7 +62,7 @@ export class PasswordResetService {
   }
 
   async requestPasswordReset(email: string): Promise<{ message: string }> {
-    this.logger.log('Processing password reset request', PasswordResetService.name);
+    this.logger.log('Processing password reset request');
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -95,8 +96,7 @@ export class PasswordResetService {
     } catch (error) {
       this.logger.error(
         `Failed to send password reset link to ${email}`,
-        error instanceof Error ? error.stack : String(error),
-        PasswordResetService.name
+        error instanceof Error ? error.stack : String(error)
       );
 
       if (error instanceof HttpException) {
@@ -112,14 +112,14 @@ export class PasswordResetService {
   }
 
   async validateResetToken(token: string): Promise<{ message: string }> {
-    this.logger.log('Validating password reset token', PasswordResetService.name);
+    this.logger.log('Validating password reset token');
     await this.getValidResetRecord(token);
 
     return { message: 'Reset token is valid' };
   }
 
   async completePasswordReset(token: string, password: string): Promise<{ message: string }> {
-    this.logger.log('Completing password reset', PasswordResetService.name);
+    this.logger.log('Completing password reset');
     const record = await this.getValidResetRecord(token);
 
     const hashed = await bcrypt.hash(password, 10);

@@ -1,14 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { google } from 'googleapis';
-import { LoggerService } from '@src/common/logger/logger.service';
+import { TraceLogger } from '@src/common/logger/logger.service';
 
 @Injectable()
 export class GmailService {
   private static readonly REQUIRED_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
-
+  private readonly logger = new TraceLogger(GmailService.name);
   private gmail;
 
-  constructor(private readonly logger: LoggerService) {
+  constructor() {
     const googleClientId = process.env['GOOGLE_CLIENT_ID'];
     const googleClientSecret = process.env['GOOGLE_CLIENT_SECRET'];
     const googleRedirectUri = process.env['GOOGLE_REDIRECT_URI'];
@@ -37,7 +37,7 @@ export class GmailService {
   }
 
   async sendEmail(to: string, subject: string, html: string): Promise<void> {
-    this.logger.log('Sending email through Gmail API', GmailService.name);
+    this.logger.log('Sending email through Gmail API');
     const sender = process.env['MAIL_SENDER_EMAIL'];
 
     const messageParts = [
@@ -65,7 +65,7 @@ export class GmailService {
         },
       });
 
-      this.logger.log(`Email sent to ${to}`, GmailService.name);
+      this.logger.log(`Email sent to ${to}`);
     } catch (error) {
       const err = error as {
         code?: number;
@@ -75,7 +75,7 @@ export class GmailService {
 
       const message = err.response?.data?.error?.message ?? err.message ?? 'Unknown Gmail error';
 
-      this.logger.error(`Failed to send email: ${message}`, undefined, GmailService.name);
+      this.logger.error(`Failed to send email: ${message}`);
 
       if (
         err.code === 403 &&
@@ -91,7 +91,7 @@ export class GmailService {
   }
 
   async sendPasswordResetLinkEmail(to: string, resetUrl: string): Promise<void> {
-    this.logger.log('Sending password reset email', GmailService.name);
+    this.logger.log('Sending password reset email');
     const subject = 'Reset your password';
 
     const html = `

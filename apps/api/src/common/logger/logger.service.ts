@@ -1,26 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Logger, LoggerService } from '@nestjs/common';
 
-@Injectable()
-export class LoggerService {
-  private readonly logger = new Logger();
-
-  log(message: string, context?: string): void {
-    this.logger.log(message, context);
+export class TraceLogger extends Logger implements LoggerService {
+  override log(message: unknown, ...optionalParams: unknown[]): void {
+    super.log(`${message}`, ...optionalParams);
   }
 
-  error(message: string, trace?: string, context?: string): void {
-    this.logger.error(message, trace, context);
+  override warn(message: unknown, ...optionalParams: unknown[]): void {
+    super.warn(`${message}`, ...optionalParams);
   }
 
-  warn(message: string, context?: string): void {
-    this.logger.warn(message, context);
+  override error(message: unknown, ...optionalParams: unknown[]): void {
+    super.error(`${message}`, ...optionalParams);
   }
 
-  debug(message: string, context?: string): void {
-    this.logger.debug(message, context);
+  override debug(message: unknown, ...optionalParams: unknown[]): void {
+    super.debug(`${message}`, ...optionalParams);
   }
 
-  verbose(message: string, context?: string): void {
-    this.logger.verbose(message, context);
+  override verbose(message: unknown, ...optionalParams: unknown[]): void {
+    super.verbose(`${message}`, ...optionalParams);
   }
 }

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '@my-monorepo/database';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { LoggerService } from '@src/common/logger/logger.service';
 import { GmailService } from '@src/services/gmail/gmail.service';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 import {
@@ -32,16 +31,6 @@ describe('PasswordResetService', () => {
         PasswordResetService,
         PrismaService,
         { provide: GmailService, useValue: gmailService },
-        {
-          provide: LoggerService,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
-            warn: jest.fn(),
-            debug: jest.fn(),
-            verbose: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
