@@ -2,10 +2,11 @@
 
 ## How it works
 
-`pnpm run docker:prod` runs `docker-compose -f docker-compose.prod.yml up -d --build`, which builds and starts 3 containers on a shared `myapp_network`:
+`pnpm run docker:prod` runs `docker-compose -f docker-compose.prod.yml up -d --build`,
+which builds and starts 3 containers on a shared `myapp_network`:
 
 | Container | Image | Port | Role |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `myapp_postgres_prod` | postgres:16-alpine | internal only | Database with persistent volume |
 | `myapp_backend_prod` | Dockerfile.backend | 3000 | NestJS API — runs migrations then starts |
 | `myapp_frontend_prod` | Dockerfile.frontend | 80 | React app served by Nginx, proxies `/api` to backend |
@@ -15,6 +16,7 @@
 ### What each build does
 
 **Backend** (`Dockerfile.backend`):
+
 1. Installs all deps with pnpm `--shamefully-hoist`
 2. Generates Prisma client
 3. Builds NestJS with webpack (bundles app + workspace libs into `dist/main.js`)
@@ -22,6 +24,7 @@
 5. Runtime: runs `prisma migrate deploy` then `node dist/main.js`
 
 **Frontend** (`Dockerfile.frontend`):
+
 1. Installs all deps with pnpm `--shamefully-hoist`
 2. Builds React with Vite (`apps/web/dist/`)
 3. Copies built assets into nginx:alpine image
@@ -46,11 +49,13 @@ CORS_ORIGIN=http://localhost
 ```
 
 The `DATABASE_URL` is constructed automatically inside `docker-compose.prod.yml`:
-```
-postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+
+```bash
+postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5434/${DB_NAME}
 ```
 
-> **Required in production:** `DB_PASSWORD` and `JWT_SECRET` must be changed from defaults.
+> **Required in production:** `DB_PASSWORD` and `JWT_SECRET` must be changed
+> from defaults.
 
 ---
 
@@ -79,17 +84,17 @@ docker-compose -f docker-compose.prod.yml logs -f frontend
 ## Accessing the app
 
 | Endpoint | URL |
-|---|---|
-| Frontend | http://localhost |
-| API | http://localhost/api or http://localhost:3000/api |
-| Swagger | http://localhost:3000/api/docs |
+| --- | --- |
+| Frontend | <http://localhost> |
+| API | <http://localhost/api> or <http://localhost:3000/api> |
+| Swagger | <http://localhost:3000/api/docs> |
 
 ---
 
 ## Relevant files
 
 | File | Purpose |
-|---|---|
+| --- | --- |
 | `docker-compose.prod.yml` | Service orchestration |
 | `Dockerfile.backend` | Backend multi-stage build |
 | `Dockerfile.frontend` | Frontend multi-stage build |
