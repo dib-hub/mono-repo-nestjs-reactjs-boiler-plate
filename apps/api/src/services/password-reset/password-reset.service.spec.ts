@@ -67,9 +67,6 @@ describe('PasswordResetService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(crypto, 'randomBytes').mockImplementation(
-      ((size: number) => Buffer.from('a'.repeat(size * 2), 'hex')) as typeof crypto.randomBytes
-    );
     gmailService.sendPasswordResetLinkEmail.mockResolvedValue(undefined);
   });
 
