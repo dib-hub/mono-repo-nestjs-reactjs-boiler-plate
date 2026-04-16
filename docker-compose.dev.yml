@@ -2,19 +2,15 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: myapp_postgres
+    command: postgres -p 5434
     ports:
-      - '5432:5432'
+      - '5434:5434'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: myapp_dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   postgres_data:

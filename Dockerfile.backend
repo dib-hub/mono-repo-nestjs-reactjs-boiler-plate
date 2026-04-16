@@ -22,13 +22,14 @@ RUN pnpm config set registry https://registry.npmmirror.com && \
 COPY . .
 
 # Generate Prisma client before building
-RUN pnpm --filter @my-monorepo/repository exec prisma generate --schema=./prisma/schema.prisma
+RUN pnpm --filter @my-monorepo/database exec prisma generate --schema=./prisma/schema.prisma
 
 # Build API with NX (webpack bundles everything — app + workspace libs — into one file)
 RUN pnpm exec nx build api --configuration=production
 
-# Prune devDependencies so only prod deps remain in node_modules
-RUN CI=true pnpm prune --prod
+# No pruning step — webpack already bundles all app code into dist/main.js.
+# Full node_modules is copied to runtime so the prisma CLI (a devDep) is
+# available for "prisma migrate deploy" at container startup.
 
 # ─────────────────────────────────────────────
 # Stage 2: Runtime (minimal image)
@@ -46,7 +47,7 @@ COPY --from=builder /app/libs/repository/prisma ./prisma
 # Copy Prisma config (Prisma 7 reads datasource URL from here)
 COPY --from=builder /app/libs/repository/prisma.config.ts ./prisma.config.ts
 
-# Copy pruned node_modules from builder (no network calls needed)
+# Copy node_modules from builder (includes prisma CLI for migrate deploy)
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000

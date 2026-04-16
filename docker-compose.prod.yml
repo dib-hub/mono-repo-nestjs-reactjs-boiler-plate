@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: myapp_postgres_prod
+    command: postgres -p 5434
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -10,16 +11,10 @@ services:
       POSTGRES_DB: ${DB_NAME:-myapp_prod}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-postgres}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - myapp_network
-    # Don't expose 5432 publicly in prod — backend talks to it internally
-    expose:
-      - '5432'
+    ports:
+      - '5434:5434'
 
   # ── Backend API ───────────────────────────────────────────
   backend:
@@ -33,24 +28,16 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-myapp_prod}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5434/${DB_NAME:-myapp_prod}
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN:-}
+      MAIL_SENDER_EMAIL: ${MAIL_SENDER_EMAIL:-}
     depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          'CMD',
-          'node',
-          '-e',
-          "require('http').get('http://localhost:3000/api', (r) => { process.exit(r.statusCode < 500 ? 0 : 1) })",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      - postgres
     networks:
       - myapp_network
 
@@ -59,13 +46,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost}
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
     container_name: myapp_frontend_prod
     restart: unless-stopped
     ports:
       - '80:80'
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - myapp_network
 

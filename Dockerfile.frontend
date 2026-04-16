@@ -20,6 +20,12 @@ RUN pnpm config set registry https://registry.npmmirror.com && \
 # Copy full source
 COPY . .
 
+# Build-time env vars (Vite bakes these into the static bundle at build time)
+ARG VITE_API_BASE_URL
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
 # Build the frontend
 RUN pnpm exec nx build web --configuration=production
 
