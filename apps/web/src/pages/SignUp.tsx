@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FormikErrors, useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { ISignUp, IUserSignUp } from '@my-monorepo/types';
+import { CreateUser, UserRole } from '@my-monorepo/types';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { AnimatedErrorAlert } from '@src/components/AnimatedErrorAlert';
 import { Input } from '@src/components/Input';
 import { Button } from '@src/components/Button';
+import { PasswordVisibilityButton } from '@src/components/PasswordVisibilityButton';
 import { userGoogleSignIn, userSignUp } from '@src/services/auth';
 import { clearError } from '@src/redux/slices/authSlice';
 import { RootState, AppDispatch } from '@src/redux/store';
@@ -17,7 +19,19 @@ export const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading, error, success } = useSelector((state: RootState) => state.authSlice);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
+  // Clear error and success states on component mount and unmount
+  useEffect(() => {
+    dispatch(clearError());
+    setLocalError(null);
+
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
+  // Handle successful signup
   useEffect(() => {
     if (success && user) {
       setLocalError(null);
@@ -27,8 +41,8 @@ export const SignUp: React.FC = () => {
     }
   }, [success, user, navigate]);
 
-  const validate = useCallback((values: ISignUp): FormikErrors<ISignUp> => {
-    const errors: FormikErrors<ISignUp> = {};
+  const validate = useCallback((values: CreateUser): FormikErrors<CreateUser> => {
+    const errors: FormikErrors<CreateUser> = {};
 
     if (!values.firstName.trim()) {
       errors.firstName = 'First name is required';
@@ -66,17 +80,20 @@ export const SignUp: React.FC = () => {
       email: '',
       password: '',
       confirmPassword: '',
+      role: UserRole.USER,
     },
     validate,
     onSubmit: async (values) => {
       setLocalError(null);
       dispatch(clearError());
 
-      const signupData: IUserSignUp = {
+      const signupData: CreateUser = {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
+        confirmPassword: values.confirmPassword,
+        role: values.role,
       };
 
       try {
@@ -84,8 +101,6 @@ export const SignUp: React.FC = () => {
       } catch (err: unknown) {
         if (err instanceof Error) {
           setLocalError(err.message);
-        } else {
-          setLocalError('Signup failed. Please try again.');
         }
       }
     },
@@ -137,12 +152,6 @@ export const SignUp: React.FC = () => {
           {success && user && (
             <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
               Signup successful! Redirecting...
-            </div>
-          )}
-
-          {displayError && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              {displayError}
             </div>
           )}
 
@@ -221,13 +230,20 @@ export const SignUp: React.FC = () => {
 
             <div>
               <Input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Create password"
                 name="password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={loading}
+                endAdornment={
+                  <PasswordVisibilityButton
+                    visible={showPassword}
+                    onClick={() => setShowPassword((current) => !current)}
+                    disabled={loading}
+                  />
+                }
               />
               {formik.touched.password && formik.errors.password && (
                 <div className="text-red-500 text-sm mt-1">{formik.errors.password}</div>
@@ -236,13 +252,20 @@ export const SignUp: React.FC = () => {
 
             <div>
               <Input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Confirm password"
                 name="confirmPassword"
                 value={formik.values.confirmPassword}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={loading}
+                endAdornment={
+                  <PasswordVisibilityButton
+                    visible={showPassword}
+                    onClick={() => setShowPassword((current) => !current)}
+                    disabled={loading}
+                  />
+                }
               />
               {formik.touched.confirmPassword && formik.errors.confirmPassword && (
                 <div className="text-red-500 text-sm mt-1">{formik.errors.confirmPassword}</div>
@@ -252,6 +275,7 @@ export const SignUp: React.FC = () => {
             <Button type="submit" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
             </Button>
+            <AnimatedErrorAlert message={displayError} />
           </form>
 
           <div className="text-center mt-6">

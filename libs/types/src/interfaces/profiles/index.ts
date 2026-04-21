@@ -1,4 +1,1 @@
-export * from './upsert-profile.interface';
-export * from './profile-response.interface';
-export * from './profile-form-data.interface';
-export * from './profile';
+export * from './profile.interface';

@@ -46,10 +46,10 @@ model Profile {
 
 model PasswordReset {
   id        String   @id @default(uuid())
-  email     String        @unique
-  otp       String
+  email     String   @unique
+  token     String
   expiresAt DateTime
-  createdAt DateTime      @default(now())
+  createdAt DateTime @default(now())
 }
 
 enum UserRole {

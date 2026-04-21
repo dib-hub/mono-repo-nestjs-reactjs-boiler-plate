@@ -2,23 +2,38 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormikErrors, useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { ISignIn, IUserSignIn } from '@my-monorepo/types';
+import { ISignIn } from '@my-monorepo/types';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { Button } from '@src/components/Button';
+import { AnimatedErrorAlert } from '@src/components/AnimatedErrorAlert';
 import { Input } from '@src/components/Input';
+import { PasswordVisibilityButton } from '@src/components/PasswordVisibilityButton';
 import { clearError } from '@src/redux/slices/authSlice';
 import { AppDispatch, RootState } from '@src/redux/store';
 import { userGoogleSignIn, userSignIn } from '@src/services/auth';
 
 const googleClientId = import.meta.env['VITE_GOOGLE_CLIENT_ID'] as string;
+const SIGNIN_ERROR_MESSAGE = 'Email or password is incorrect.';
 
 export const SignIn: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { user, loading, error, success } = useSelector((state: RootState) => state.authSlice);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
+  // Clear error and success states on component mount and unmount
+  useEffect(() => {
+    dispatch(clearError());
+    setLocalError(null);
+
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
+  // Handle successful signin
   useEffect(() => {
     if (success && user) {
       setLocalError(null);
@@ -53,26 +68,23 @@ export const SignIn: React.FC = () => {
       setLocalError(null);
       dispatch(clearError());
 
-      const signInData: IUserSignIn = {
+      const signInData: ISignIn = {
         email: values.email,
         password: values.password,
       };
 
       try {
         await dispatch(userSignIn(signInData)).unwrap();
-      } catch (err: unknown) {
-        if (typeof err === 'string') {
-          setLocalError(err);
-        } else if (err instanceof Error) {
-          setLocalError(err.message);
-        } else {
-          setLocalError('Signin failed. Please try again.');
-        }
+      } catch {
+        setLocalError(SIGNIN_ERROR_MESSAGE);
       }
     },
   });
 
-  const displayError = useMemo(() => localError || error, [localError, error]);
+  const displayError = useMemo(
+    () => localError || (error ? SIGNIN_ERROR_MESSAGE : null),
+    [localError, error]
+  );
 
   const handleGoogleSuccess = useCallback(
     async (credentialResponse: CredentialResponse) => {
@@ -118,12 +130,6 @@ export const SignIn: React.FC = () => {
           {success && user && (
             <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
               Login successful! Redirecting...
-            </div>
-          )}
-
-          {displayError && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              {displayError}
             </div>
           )}
 
@@ -178,13 +184,20 @@ export const SignIn: React.FC = () => {
             </div>
             <div>
               <Input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="Password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={loading}
+                endAdornment={
+                  <PasswordVisibilityButton
+                    visible={showPassword}
+                    onClick={() => setShowPassword((current) => !current)}
+                    disabled={loading}
+                  />
+                }
               />
               {formik.touched.password && formik.errors.password && (
                 <div className="text-red-500 text-sm mt-1">{formik.errors.password}</div>
@@ -209,6 +222,7 @@ export const SignIn: React.FC = () => {
             <Button type="submit" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
+            <AnimatedErrorAlert message={displayError} />
           </form>
 
           <div className="text-center mt-6">
@@ -219,7 +233,7 @@ export const SignIn: React.FC = () => {
 
           <div className="text-center mt-4">
             <span className="text-gray-700">Don't have an account? </span>
-            <Link to="/sign-up" className="text-black font-semibold hover:underline">
+            <Link to="/sign-up" className="text-blue-500 font-semibold hover:underline">
               Create an account
             </Link>
           </div>

@@ -3,44 +3,31 @@ import axios from 'axios';
 import {
   IAuthResponse,
   IPasswordResetResponse,
-  IRequestReset,
+  IRequestPasswordReset,
+  IValidatePasswordResetToken,
   IUser,
-  IUserSignIn,
-  IUserSignUp,
-  IVerifyReset,
+  ISignIn,
+  ICompletePasswordReset,
+  CreateUser,
 } from '@my-monorepo/types';
 import { authInstance } from '@src/apis/initialize.instance';
 
-export const userSignUp = createAsyncThunk<IAuthResponse, IUserSignUp, { rejectValue: string }>(
+export const userSignUp = createAsyncThunk<IAuthResponse, CreateUser, { rejectValue: string }>(
   'auth/userSignUp',
-  async (userData: IUserSignUp, { rejectWithValue }) => {
+  async (userData: CreateUser, { rejectWithValue }) => {
     try {
-      const response = await authInstance.post('signup', {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        password: userData.password,
-      });
+      const response = await authInstance.post('signup', userData);
 
       if (response && response.data) {
         return response.data as IAuthResponse;
       }
       throw new Error('No response data received');
-    } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string | string[] }>(err)) {
-        const data = err.response?.data;
-        const msg = data?.message;
-        if (Array.isArray(msg)) {
-          return rejectWithValue(msg.join(', '));
-        }
-        return rejectWithValue(typeof msg === 'string' ? msg : 'Signup failed. Please try again.');
+    } catch (error) {
+      if (axios.isAxiosError<{ message?: string }>(error)) {
+        return rejectWithValue(error.response?.data?.message ?? 'An unknown error occurred');
       }
 
-      if (err instanceof Error) {
-        return rejectWithValue(err.message);
-      }
-
-      return rejectWithValue('Signup failed. Please try again.');
+      return rejectWithValue('An unknown error occurred');
     }
   }
 );
@@ -68,30 +55,20 @@ export const getCurrentUser = createAsyncThunk<IUser, void, { rejectValue: strin
   }
 );
 
-export const userSignIn = createAsyncThunk<IAuthResponse, IUserSignIn, { rejectValue: string }>(
+export const userSignIn = createAsyncThunk<IAuthResponse, ISignIn, { rejectValue: string }>(
   'auth/userSignIn',
-  async (credentials: IUserSignIn, { rejectWithValue }) => {
+  async (credentials: ISignIn, { rejectWithValue }) => {
     try {
       const response = await authInstance.post('signin', credentials);
       if (response && response.data) {
         return response.data as IAuthResponse;
       }
       throw new Error('No response data received');
-    } catch (err: unknown) {
-      if (axios.isAxiosError<{ message?: string | string[] }>(err)) {
-        const data = err.response?.data;
-        const msg = data?.message;
-        if (Array.isArray(msg)) {
-          return rejectWithValue(msg.join(', '));
-        }
-        return rejectWithValue(typeof msg === 'string' ? msg : 'Signin failed. Please try again.');
+    } catch (error) {
+      if (axios.isAxiosError<{ message?: string }>(error)) {
+        return rejectWithValue(error.response?.data?.message ?? 'Email or password is incorrect.');
       }
-
-      if (err instanceof Error) {
-        return rejectWithValue(err.message);
-      }
-
-      return rejectWithValue('Signin failed. Please try again.');
+      return rejectWithValue('Email or password is incorrect.');
     }
   }
 );
@@ -127,44 +104,44 @@ export const userGoogleSignIn = createAsyncThunk<
   }
 });
 
-const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
-  if (axios.isAxiosError<{ message?: string | string[] }>(error)) {
-    const msg = error.response?.data?.message;
-
-    if (Array.isArray(msg)) {
-      return msg.join(', ');
-    }
-
-    if (typeof msg === 'string') {
-      return msg;
-    }
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallbackMessage;
-};
-
 export const requestPasswordReset = async (
-  payload: IRequestReset
+  payload: IRequestPasswordReset
 ): Promise<IPasswordResetResponse> => {
   try {
     const response = await authInstance.post('password-reset/request', payload);
     return response.data as IPasswordResetResponse;
-  } catch (error: unknown) {
-    throw new Error(getErrorMessage(error, 'Failed to request password reset.'));
+  } catch (error) {
+    if (axios.isAxiosError<{ message?: string }>(error)) {
+      throw new Error(error.response?.data?.message ?? 'Failed to request password reset.');
+    }
+    throw new Error('Failed to request password reset.');
   }
 };
 
-export const verifyPasswordReset = async (
-  payload: IVerifyReset
+export const completePasswordReset = async (
+  payload: ICompletePasswordReset
+): Promise<IPasswordResetResponse> => {
+  try {
+    const response = await authInstance.post('password-reset/complete', payload);
+    return response.data as IPasswordResetResponse;
+  } catch (error) {
+    if (axios.isAxiosError<{ message?: string }>(error)) {
+      throw new Error(error.response?.data?.message ?? 'Failed to reset password.');
+    }
+    throw new Error('Failed to reset password.');
+  }
+};
+
+export const validatePasswordResetToken = async (
+  payload: IValidatePasswordResetToken
 ): Promise<IPasswordResetResponse> => {
   try {
     const response = await authInstance.post('password-reset/verify', payload);
     return response.data as IPasswordResetResponse;
-  } catch (error: unknown) {
-    throw new Error(getErrorMessage(error, 'Failed to reset password.'));
+  } catch (error) {
+    if (axios.isAxiosError<{ message?: string }>(error)) {
+      throw new Error(error.response?.data?.message ?? 'Reset link is invalid or expired.');
+    }
+    throw new Error('Reset link is invalid or expired.');
   }
 };

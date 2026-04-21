@@ -126,19 +126,4 @@ describe('GmailService', () => {
       );
     });
   });
-
-  describe('sendOtpEmail', () => {
-    it('should call sendEmail with password reset subject and OTP in body', async () => {
-      mockSend.mockResolvedValue({});
-
-      await service.sendOtpEmail('to@example.com', '123456');
-
-      expect(mockSend).toHaveBeenCalledTimes(1);
-      const call = mockSend.mock.calls[0][0] as { requestBody: { raw: string } };
-      // Restore URL-safe base64 to standard before decoding
-      const standardBase64 = call.requestBody.raw.replace(/-/g, '+').replace(/_/g, '/');
-      const decoded = Buffer.from(standardBase64, 'base64').toString('utf-8');
-      expect(decoded).toContain('123456');
-    });
-  });
 });

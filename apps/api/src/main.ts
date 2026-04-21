@@ -1,14 +1,16 @@
 import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@src/app/app.module';
 import { AllExceptionsFilter } from '@src/common/filters/all-exceptions-filter';
+import { TraceLogger } from '@src/common/logger/logger.service';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
+  const logger = app.get(TraceLogger);
   const port = configService.get<number>('PORT', 3000);
   const corsOrigins = (
     configService.get<string>('CORS_ORIGIN', 'http://localhost:4200,http://localhost:4201') ?? ''
@@ -17,7 +19,6 @@ async function bootstrap(): Promise<void> {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  // Enable CORS
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin || corsOrigins.includes(origin)) {
@@ -30,7 +31,6 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  // Add global prefix
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
@@ -41,10 +41,10 @@ async function bootstrap(): Promise<void> {
     })
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(app.get(AllExceptionsFilter));
 
   await app.listen(port, () => {
-    Logger.log(`🚀 Server is running on http://localhost:${port}/api`, 'Bootstrap');
+    logger.log(`Server is running on http://localhost:${port}/api`, 'Bootstrap');
   });
 }
 

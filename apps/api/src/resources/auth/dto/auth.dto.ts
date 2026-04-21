@@ -1,13 +1,15 @@
 import {
+  CreateUser,
+  IUpdateUser,
   IUser,
+  UserRole,
   type IAuthResponse,
   type IGoogleAuth,
   type ISignIn,
-  type IUpdateUser,
-  UserRole,
+  type ISignUp,
 } from '@my-monorepo/types';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
+import { IsEmail, IsEnum, IsString, MinLength, Validate } from 'class-validator';
 
 export class SignInDto implements ISignIn {
   @ApiProperty({
@@ -24,6 +26,29 @@ export class SignInDto implements ISignIn {
   password: string;
 }
 
+export class SignUpDto extends SignInDto implements ISignUp {
+  @ApiProperty({
+    example: 'John',
+  })
+  @IsString()
+  @MinLength(2)
+  firstName: string;
+
+  @ApiProperty({
+    example: 'Doe',
+  })
+  @IsString()
+  @MinLength(2)
+  lastName: string;
+
+  @ApiProperty({
+    example: UserRole.USER,
+    description: 'User role',
+  })
+  @IsEnum(UserRole)
+  role: UserRole;
+}
+
 export class GoogleAuthDto implements IGoogleAuth {
   @ApiProperty({
     description: 'Google ID token returned by Google OAuth',
@@ -33,82 +58,38 @@ export class GoogleAuthDto implements IGoogleAuth {
   idToken: string;
 }
 
-export class UpdateUserDto implements IUpdateUser {
-  @ApiPropertyOptional({
-    example: 'john@example.com',
+export class CreateUserDto extends SignUpDto implements CreateUser {
+  @ApiProperty({
+    example: 'StrongPassword123',
+    required: false,
   })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({
-    example: 'John',
-  })
-  @IsOptional()
   @IsString()
-  @MinLength(2)
-  firstName?: string;
-
-  @ApiPropertyOptional({
-    example: 'Doe',
+  @MinLength(6)
+  @Validate((obj: CreateUserDto) => !obj.confirmPassword || obj.password === obj.confirmPassword, {
+    message: 'confirmPassword must match password',
   })
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  lastName?: string;
-
-  @ApiPropertyOptional({
-    enum: UserRole,
-    example: UserRole.USER,
-  })
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  confirmPassword: string;
 }
 
-export class UserResponseDto implements IUser {
-  @ApiProperty({
-    example: 'clx9z2kq00001abc123',
-  })
+export class UserDto extends OmitType(CreateUserDto, ['confirmPassword']) implements IUser {
+  @ApiProperty({ example: 'user-uuid', description: 'User unique identifier' })
+  @IsString()
   id: string;
 
-  @ApiProperty({
-    example: 'john@example.com',
-  })
-  email: string;
-
-  @ApiProperty({
-    example: 'John',
-  })
-  firstName: string;
-
-  @ApiProperty({
-    example: 'Doe',
-  })
-  lastName: string;
-
-  @ApiProperty({
-    enum: UserRole,
-    example: UserRole.USER,
-  })
-  role: UserRole;
-
-  @ApiProperty({
-    example: '2025-01-01T10:00:00.000Z',
-  })
+  @ApiProperty({ example: '2024-03-05T12:34:56.789Z', description: 'User creation timestamp' })
   createdAt: Date;
 
-  @ApiProperty({
-    example: '2025-01-01T10:00:00.000Z',
-  })
+  @ApiProperty({ example: '2024-03-05T12:34:56.789Z', description: 'User last update timestamp' })
   updatedAt: Date;
 }
 
+export class UpdateUserDto extends PartialType(SignUpDto) implements IUpdateUser {}
+
 export class AuthResponseDto implements IAuthResponse {
   @ApiProperty({
-    type: UserResponseDto,
+    type: UserDto,
   })
-  user: UserResponseDto;
+  user: UserDto;
 
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',

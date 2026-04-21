@@ -26,7 +26,7 @@ nx test api
 
 ## Project Structure
 
-```
+```text
 src/
 ├── main.ts              # Entry point
 └── app/

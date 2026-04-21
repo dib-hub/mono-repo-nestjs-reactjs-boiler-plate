@@ -1,5 +1,6 @@
-import { useState, JSX, FC, FormEvent, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, JSX, FC, FormEvent, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { AnimatedErrorAlert } from '@src/components/AnimatedErrorAlert';
 import { Button } from '@src/components/Button';
 import { Input } from '@src/components/Input';
 import { requestPasswordReset } from '@src/services/auth';
@@ -7,12 +8,19 @@ import { requestPasswordReset } from '@src/services/auth';
 const decorationIndices = Array.from({ length: 9 }, (_, i) => i);
 
 export const ForgotPassword: FC = (): JSX.Element => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  // Clear error states on component unmount
+  useEffect(() => {
+    return () => {
+      setError(null);
+      setSuccessMessage('');
+    };
+  }, []);
 
   const handleFormSubmit = useCallback(
     async (e: FormEvent): Promise<void> => {
@@ -32,10 +40,6 @@ export const ForgotPassword: FC = (): JSX.Element => {
         const response = await requestPasswordReset({ email: normalizedEmail });
         setSuccessMessage(response.message);
         setSubmitted(true);
-
-        setTimeout(() => {
-          navigate(`/reset-password?email=${encodeURIComponent(normalizedEmail)}`);
-        }, 1200);
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err.message);
@@ -46,7 +50,7 @@ export const ForgotPassword: FC = (): JSX.Element => {
         setLoading(false);
       }
     },
-    [email, navigate]
+    [email]
   );
 
   const handleReset = useCallback((): void => {
@@ -65,12 +69,6 @@ export const ForgotPassword: FC = (): JSX.Element => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Forgot password?</h2>
             <p className="text-gray-600">No worries, we'll help you reset it.</p>
           </div>
-
-          {error && !submitted && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700">
-              {error}
-            </div>
-          )}
 
           {!submitted ? (
             <form
@@ -92,20 +90,18 @@ export const ForgotPassword: FC = (): JSX.Element => {
               </div>
 
               <Button type="submit" disabled={loading}>
-                {loading ? 'Sending OTP...' : 'Send OTP'}
+                {loading ? 'Sending reset link...' : 'Send reset link'}
               </Button>
+              <AnimatedErrorAlert message={error} />
             </form>
           ) : (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Check your email</h3>
               <p className="text-gray-600 mb-4">{successMessage}</p>
               <p className="text-gray-600 mb-6">
-                We sent a 6-digit OTP to <span className="font-medium">{email}</span>. You will be
-                redirected to the reset page.
+                If an account exists for <span className="font-medium">{email}</span>, you will
+                receive a reset link. Open that link to create a new password.
               </p>
-              <Link to={`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`}>
-                <Button>Go to reset password</Button>
-              </Link>
               <button
                 type="button"
                 className="mt-4 text-sm text-gray-700 hover:text-black transition"

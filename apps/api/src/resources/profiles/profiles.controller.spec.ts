@@ -1,10 +1,3 @@
-/**
- * ProfilesController — integration tests
- *
- * Uses real PrismaService + ProfilesRepoService + ProfilesService against the
- * Docker test database. Controller methods are called directly to test both
- * routing/ownership logic AND real DB reads/writes.
- */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException } from '@nestjs/common';
 import { PrismaService, ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
@@ -24,7 +17,7 @@ describe('ProfilesController', () => {
     name: 'New Controller Profile',
     email: 'ctrl-new@example.com',
     linkedInUrl: 'https://linkedin.com/in/ctrl',
-    githubUrl: null,
+    githubUrl: 'https://github.com/ctrl',
   };
 
   beforeAll(async () => {

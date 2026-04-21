@@ -5,12 +5,13 @@
  * Only JwtService is mocked (no real signing needed).
  */
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
 import { AuthService } from '@src/resources/auth/auth.service';
-import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/auth.dto';
 import { cleanUpUsers } from '@src/testUtils';
+import { UserRole } from '@my-monorepo/types';
 
 describe('AuthService', () => {
   let module: TestingModule;
@@ -23,6 +24,8 @@ describe('AuthService', () => {
     firstName: 'Test',
     lastName: 'User',
     password: 'Password123!',
+    confirmPassword: 'Password123!',
+    role: UserRole.USER,
   };
 
   beforeAll(async () => {
@@ -71,6 +74,8 @@ describe('AuthService', () => {
       firstName: 'New',
       lastName: 'User',
       password: 'Password123!',
+      confirmPassword: 'Password123!',
+      role: UserRole.USER,
     };
 
     it('hashes password, creates user, and returns a JWT', async () => {
@@ -121,9 +126,9 @@ describe('AuthService', () => {
       expect(result).not.toHaveProperty('password');
     });
 
-    it('throws BadRequestException when user is not found', async () => {
+    it('throws NotFoundException when user is not found', async () => {
       await expect(service.getUserById('00000000-0000-0000-0000-000000000000')).rejects.toThrow(
-        BadRequestException
+        NotFoundException
       );
     });
   });

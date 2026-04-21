@@ -1,20 +1,14 @@
-/**
- * AuthController — integration tests
- *
- * Uses real PrismaService + UsersService + AuthService against the Docker test
- * database. JwtService is mocked (no real signing). GoogleAuthService is mocked
- * (external OAuth, no network calls in tests).
- */
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService, UsersService } from '@my-monorepo/database';
 import { AuthController } from '@src/resources/auth/auth.controller';
 import { AuthService } from '@src/resources/auth/auth.service';
-import { CreateUserDto, UserDto } from '@src/resources/auth/dto/user.dto';
 import { GoogleAuthService } from '@src/services/google-auth/google-auth.service';
 import { PasswordResetService } from '@src/services/password-reset/password-reset.service';
 import { cleanUpUsers } from '@src/testUtils';
+import { CreateUserDto, UserDto } from '@src/resources/auth/dto/auth.dto';
+import { UserRole } from '@my-monorepo/types';
 
 describe('AuthController', () => {
   let module: TestingModule;
@@ -22,18 +16,28 @@ describe('AuthController', () => {
   let prisma: PrismaService;
   let testUser: UserDto;
   let googleAuthService: { loginWithGoogle: jest.Mock };
-  let passwordResetService: { requestReset: jest.Mock; verifyReset: jest.Mock };
+  let passwordResetService: {
+    requestPasswordReset: jest.Mock;
+    validateResetToken: jest.Mock;
+    completePasswordReset: jest.Mock;
+  };
   const userIdsToClean: string[] = [];
   const dto: CreateUserDto = {
     email: 'auth-ctrl-test@example.com',
     firstName: 'Test',
     lastName: 'User',
     password: 'Password123!',
+    confirmPassword: 'Password123!',
+    role: UserRole.USER,
   };
 
   beforeAll(async () => {
     googleAuthService = { loginWithGoogle: jest.fn() };
-    passwordResetService = { requestReset: jest.fn(), verifyReset: jest.fn() };
+    passwordResetService = {
+      requestPasswordReset: jest.fn(),
+      validateResetToken: jest.fn(),
+      completePasswordReset: jest.fn(),
+    };
 
     module = await Test.createTestingModule({
       controllers: [AuthController],
@@ -81,6 +85,8 @@ describe('AuthController', () => {
       firstName: 'New',
       lastName: 'User',
       password: 'Password123!',
+      confirmPassword: 'Password123!',
+      role: UserRole.USER,
     };
 
     it('creates a new user in DB and returns an auth response', async () => {
@@ -149,10 +155,18 @@ describe('AuthController', () => {
 
 describe('AuthController (password reset) — unit tests', () => {
   let controller: AuthController;
-  let passwordResetService: { requestReset: jest.Mock; verifyReset: jest.Mock };
+  let passwordResetService: {
+    requestPasswordReset: jest.Mock;
+    validateResetToken: jest.Mock;
+    completePasswordReset: jest.Mock;
+  };
 
   beforeEach(() => {
-    passwordResetService = { requestReset: jest.fn(), verifyReset: jest.fn() };
+    passwordResetService = {
+      requestPasswordReset: jest.fn(),
+      validateResetToken: jest.fn(),
+      completePasswordReset: jest.fn(),
+    };
 
     // Pure unit test: dummy dependencies, only passwordResetService is used.
     controller = new AuthController(
@@ -162,28 +176,42 @@ describe('AuthController (password reset) — unit tests', () => {
     );
   });
 
-  it('requests OTP reset for the provided email', async () => {
-    passwordResetService.requestReset.mockResolvedValue({ message: 'OTP sent to your email' });
+  it('requests reset link for the provided email', async () => {
+    passwordResetService.requestPasswordReset.mockResolvedValue({
+      message: 'If an account exists for this email, a reset link has been sent.',
+    });
 
     const result = await controller.requestPasswordReset({ email: 'test@example.com' } as any);
 
-    expect(result).toEqual({ message: 'OTP sent to your email' });
-    expect(passwordResetService.requestReset).toHaveBeenCalledWith('test@example.com');
+    expect(result).toEqual({
+      message: 'If an account exists for this email, a reset link has been sent.',
+    });
+    expect(passwordResetService.requestPasswordReset).toHaveBeenCalledWith('test@example.com');
   });
 
-  it('verifies OTP reset payload', async () => {
-    passwordResetService.verifyReset.mockResolvedValue({ message: 'Password updated' });
+  it('validates reset token separately before password update', async () => {
+    passwordResetService.validateResetToken.mockResolvedValue({ message: 'Reset token is valid' });
 
-    const result = await controller.verifyPasswordReset({
-      email: 'test@example.com',
-      otp: '123456',
+    const result = await controller.validatePasswordResetToken({
+      token: 'a-valid-token',
+    } as any);
+
+    expect(result).toEqual({ message: 'Reset token is valid' });
+    expect(passwordResetService.validateResetToken).toHaveBeenCalledWith('a-valid-token');
+  });
+
+  it('completes password reset with the provided token payload', async () => {
+    passwordResetService.completePasswordReset.mockResolvedValue({ message: 'Password updated' });
+
+    const result = await controller.completePasswordReset({
+      token: 'a-valid-token',
       password: 'newStrongPassword123',
+      confirmPassword: 'newStrongPassword123',
     } as any);
 
     expect(result).toEqual({ message: 'Password updated' });
-    expect(passwordResetService.verifyReset).toHaveBeenCalledWith(
-      'test@example.com',
-      '123456',
+    expect(passwordResetService.completePasswordReset).toHaveBeenCalledWith(
+      'a-valid-token',
       'newStrongPassword123'
     );
   });

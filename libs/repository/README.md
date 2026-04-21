@@ -4,11 +4,12 @@ Prisma database client, services, and database module for the monorepo.
 
 ## Getting Started
 
-This library encapsulates all database operations and exports a `PrismaService` that can be injected into NestJS modules.
+This library encapsulates all database operations and exports a `PrismaService`
+that can be injected into NestJS modules.
 
 ## Structure
 
-```
+```text
 src/
 ├── database.module.ts      # NestJS module that exports PrismaService
 ├── lib/
@@ -81,8 +82,8 @@ nx run database:prisma-migrate-deploy
 
 Required in `.env`:
 
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+```env
+DATABASE_URL="postgresql://user:password@localhost:5434/dbname?schema=public"
 ```
 
 ## Testing

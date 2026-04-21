@@ -26,7 +26,7 @@ nx test web
 
 ## Project Structure
 
-```
+```text
 src/
 ├── main.tsx              # Entry point
 ├── app/
@@ -44,11 +44,13 @@ src/
 
 ### Tailwind CSS
 
-Tailwind CSS is configured in `tailwind.config.js`. Customize colors, fonts, and other design tokens there.
+Tailwind CSS is configured in `tailwind.config.js`. Customize colors, fonts,
+and other design tokens there.
 
 ### Vite
 
-Build and dev server configuration is in `vite.config.ts`. The app includes a proxy for `/api` routes to the backend server.
+Build and dev server configuration is in `vite.config.ts`. The app includes a
+proxy for `/api` routes to the backend server.
 
 ## Dependencies
 
@@ -62,7 +64,7 @@ Build and dev server configuration is in `vite.config.ts`. The app includes a pr
 
 Create a `.env.local` file with:
 
-```
+```env
 VITE_API_URL=http://localhost:3000/api
 ```
 

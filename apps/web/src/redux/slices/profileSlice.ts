@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { ProfileState } from '@my-monorepo/types';
+import { IProfileState } from '@my-monorepo/types';
 import { getProfileByUserId, upsertProfile } from '@src/services/profile';
 import { logout } from '@src/redux/slices/authSlice';
 
-const initialState: ProfileState = {
+const initialState: IProfileState = {
   profile: null,
   profileUserId: null,
   loading: false,

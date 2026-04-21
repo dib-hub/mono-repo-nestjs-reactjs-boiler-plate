@@ -19,6 +19,7 @@ describe('UsersService (integration)', () => {
     firstName: `First${suffix}`,
     lastName: `Last${suffix}`,
     password: `Password-${suffix}`,
+    confirmPassword: `Password-${suffix}`,
     role,
   });
 

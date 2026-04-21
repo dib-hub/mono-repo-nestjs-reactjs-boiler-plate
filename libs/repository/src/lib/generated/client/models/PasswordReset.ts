@@ -27,7 +27,7 @@ export type AggregatePasswordReset = {
 export type PasswordResetMinAggregateOutputType = {
   id: string | null
   email: string | null
-  otp: string | null
+  token: string | null
   expiresAt: Date | null
   createdAt: Date | null
 }
@@ -35,7 +35,7 @@ export type PasswordResetMinAggregateOutputType = {
 export type PasswordResetMaxAggregateOutputType = {
   id: string | null
   email: string | null
-  otp: string | null
+  token: string | null
   expiresAt: Date | null
   createdAt: Date | null
 }
@@ -43,7 +43,7 @@ export type PasswordResetMaxAggregateOutputType = {
 export type PasswordResetCountAggregateOutputType = {
   id: number
   email: number
-  otp: number
+  token: number
   expiresAt: number
   createdAt: number
   _all: number
@@ -53,7 +53,7 @@ export type PasswordResetCountAggregateOutputType = {
 export type PasswordResetMinAggregateInputType = {
   id?: true
   email?: true
-  otp?: true
+  token?: true
   expiresAt?: true
   createdAt?: true
 }
@@ -61,7 +61,7 @@ export type PasswordResetMinAggregateInputType = {
 export type PasswordResetMaxAggregateInputType = {
   id?: true
   email?: true
-  otp?: true
+  token?: true
   expiresAt?: true
   createdAt?: true
 }
@@ -69,7 +69,7 @@ export type PasswordResetMaxAggregateInputType = {
 export type PasswordResetCountAggregateInputType = {
   id?: true
   email?: true
-  otp?: true
+  token?: true
   expiresAt?: true
   createdAt?: true
   _all?: true
@@ -150,7 +150,7 @@ export type PasswordResetGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 export type PasswordResetGroupByOutputType = {
   id: string
   email: string
-  otp: string
+  token: string
   expiresAt: Date
   createdAt: Date
   _count: PasswordResetCountAggregateOutputType | null
@@ -179,7 +179,7 @@ export type PasswordResetWhereInput = {
   NOT?: Prisma.PasswordResetWhereInput | Prisma.PasswordResetWhereInput[]
   id?: Prisma.StringFilter<"PasswordReset"> | string
   email?: Prisma.StringFilter<"PasswordReset"> | string
-  otp?: Prisma.StringFilter<"PasswordReset"> | string
+  token?: Prisma.StringFilter<"PasswordReset"> | string
   expiresAt?: Prisma.DateTimeFilter<"PasswordReset"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"PasswordReset"> | Date | string
 }
@@ -187,7 +187,7 @@ export type PasswordResetWhereInput = {
 export type PasswordResetOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  otp?: Prisma.SortOrder
+  token?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -198,7 +198,7 @@ export type PasswordResetWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.PasswordResetWhereInput | Prisma.PasswordResetWhereInput[]
   OR?: Prisma.PasswordResetWhereInput[]
   NOT?: Prisma.PasswordResetWhereInput | Prisma.PasswordResetWhereInput[]
-  otp?: Prisma.StringFilter<"PasswordReset"> | string
+  token?: Prisma.StringFilter<"PasswordReset"> | string
   expiresAt?: Prisma.DateTimeFilter<"PasswordReset"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"PasswordReset"> | Date | string
 }, "id" | "email">
@@ -206,7 +206,7 @@ export type PasswordResetWhereUniqueInput = Prisma.AtLeast<{
 export type PasswordResetOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  otp?: Prisma.SortOrder
+  token?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.PasswordResetCountOrderByAggregateInput
@@ -220,7 +220,7 @@ export type PasswordResetScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PasswordResetScalarWhereWithAggregatesInput | Prisma.PasswordResetScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"PasswordReset"> | string
   email?: Prisma.StringWithAggregatesFilter<"PasswordReset"> | string
-  otp?: Prisma.StringWithAggregatesFilter<"PasswordReset"> | string
+  token?: Prisma.StringWithAggregatesFilter<"PasswordReset"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"PasswordReset"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PasswordReset"> | Date | string
 }
@@ -228,7 +228,7 @@ export type PasswordResetScalarWhereWithAggregatesInput = {
 export type PasswordResetCreateInput = {
   id?: string
   email: string
-  otp: string
+  token: string
   expiresAt: Date | string
   createdAt?: Date | string
 }
@@ -236,7 +236,7 @@ export type PasswordResetCreateInput = {
 export type PasswordResetUncheckedCreateInput = {
   id?: string
   email: string
-  otp: string
+  token: string
   expiresAt: Date | string
   createdAt?: Date | string
 }
@@ -244,7 +244,7 @@ export type PasswordResetUncheckedCreateInput = {
 export type PasswordResetUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  otp?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -252,7 +252,7 @@ export type PasswordResetUpdateInput = {
 export type PasswordResetUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  otp?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -260,7 +260,7 @@ export type PasswordResetUncheckedUpdateInput = {
 export type PasswordResetCreateManyInput = {
   id?: string
   email: string
-  otp: string
+  token: string
   expiresAt: Date | string
   createdAt?: Date | string
 }
@@ -268,7 +268,7 @@ export type PasswordResetCreateManyInput = {
 export type PasswordResetUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  otp?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -276,7 +276,7 @@ export type PasswordResetUpdateManyMutationInput = {
 export type PasswordResetUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  otp?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -284,7 +284,7 @@ export type PasswordResetUncheckedUpdateManyInput = {
 export type PasswordResetCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  otp?: Prisma.SortOrder
+  token?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -292,7 +292,7 @@ export type PasswordResetCountOrderByAggregateInput = {
 export type PasswordResetMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  otp?: Prisma.SortOrder
+  token?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -300,7 +300,7 @@ export type PasswordResetMaxOrderByAggregateInput = {
 export type PasswordResetMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  otp?: Prisma.SortOrder
+  token?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -310,7 +310,7 @@ export type PasswordResetMinOrderByAggregateInput = {
 export type PasswordResetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
-  otp?: boolean
+  token?: boolean
   expiresAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["passwordReset"]>
@@ -318,7 +318,7 @@ export type PasswordResetSelect<ExtArgs extends runtime.Types.Extensions.Interna
 export type PasswordResetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
-  otp?: boolean
+  token?: boolean
   expiresAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["passwordReset"]>
@@ -326,7 +326,7 @@ export type PasswordResetSelectCreateManyAndReturn<ExtArgs extends runtime.Types
 export type PasswordResetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
-  otp?: boolean
+  token?: boolean
   expiresAt?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["passwordReset"]>
@@ -334,12 +334,12 @@ export type PasswordResetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
 export type PasswordResetSelectScalar = {
   id?: boolean
   email?: boolean
-  otp?: boolean
+  token?: boolean
   expiresAt?: boolean
   createdAt?: boolean
 }
 
-export type PasswordResetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "otp" | "expiresAt" | "createdAt", ExtArgs["result"]["passwordReset"]>
+export type PasswordResetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "token" | "expiresAt" | "createdAt", ExtArgs["result"]["passwordReset"]>
 
 export type $PasswordResetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PasswordReset"
@@ -347,7 +347,7 @@ export type $PasswordResetPayload<ExtArgs extends runtime.Types.Extensions.Inter
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     email: string
-    otp: string
+    token: string
     expiresAt: Date
     createdAt: Date
   }, ExtArgs["result"]["passwordReset"]>
@@ -775,7 +775,7 @@ export interface Prisma__PasswordResetClient<T, Null = never, ExtArgs extends ru
 export interface PasswordResetFieldRefs {
   readonly id: Prisma.FieldRef<"PasswordReset", 'String'>
   readonly email: Prisma.FieldRef<"PasswordReset", 'String'>
-  readonly otp: Prisma.FieldRef<"PasswordReset", 'String'>
+  readonly token: Prisma.FieldRef<"PasswordReset", 'String'>
   readonly expiresAt: Prisma.FieldRef<"PasswordReset", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"PasswordReset", 'DateTime'>
 }

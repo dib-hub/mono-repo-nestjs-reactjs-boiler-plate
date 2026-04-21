@@ -268,7 +268,7 @@ See `.env.example` for all required variables:
 
 | Variable         | Description                  | Example                                                   |
 | ---------------- | ---------------------------- | --------------------------------------------------------- |
-| `DATABASE_URL`   | PostgreSQL connection string | `postgresql://postgres:postgres@localhost:5432/myapp_dev` |
+| `DATABASE_URL`   | PostgreSQL connection string | `postgresql://postgres:postgres@localhost:5434/myapp_dev` |
 | `PORT`           | API server port              | `3000`                                                    |
 | `NODE_ENV`       | Environment                  | `development`                                             |
 | `CORS_ORIGIN`    | Frontend URL for CORS        | `http://localhost:4200`                                   |

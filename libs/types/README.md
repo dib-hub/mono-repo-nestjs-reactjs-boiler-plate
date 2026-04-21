@@ -4,11 +4,12 @@ Shared TypeScript types, interfaces, DTOs, and enums for the entire monorepo.
 
 ## Getting Started
 
-This library is used across both frontend and backend applications to ensure type safety.
+This library is used across both frontend and backend applications to ensure
+type safety.
 
 ## Structure
 
-```
+```text
 src/
 ├── entities/     # Domain entity interfaces (framework-agnostic)
 ├── dtos/         # Data Transfer Objects (for API contracts)

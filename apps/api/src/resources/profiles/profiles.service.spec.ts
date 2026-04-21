@@ -1,8 +1,3 @@
-/**
- * ProfilesService — integration tests
- *
- * Uses real PrismaService + ProfilesRepoService against the Docker test database.
- */
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService, ProfilesService as ProfilesRepoService } from '@my-monorepo/database';
 import { ProfilesService } from '@src/resources/profiles/profiles.service';
@@ -96,14 +91,16 @@ describe('ProfilesService', () => {
       const dto: UpsertProfileDto = {
         name: 'Updated Name',
         email: 'updated@example.com',
-        linkedInUrl: null,
-        githubUrl: null,
+        linkedInUrl: 'https://linkedin.com/in/updated',
+        githubUrl: 'https://github.com/updated',
       };
 
       const result = await service.upsertProfile(newUser.id, dto);
 
       expect(result.name).toBe('Updated Name');
       expect(result.email).toBe('updated@example.com');
+      expect(result.linkedInUrl).toBe('https://linkedin.com/in/updated');
+      expect(result.githubUrl).toBe('https://github.com/updated');
     });
   });
 
