@@ -1,10 +1,12 @@
-import { JSX, useMemo } from 'react';
-import { LayoutProps, TruxOpsNavLink } from '@my-monorepo/types';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode, JSX, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@src/redux/store';
 import { logout } from '@src/redux/slices/authSlice';
-import { TruxOpsNavbar } from '@src/components/truxops/TruxOpsNavbar';
+
+interface LayoutProps {
+  children: ReactNode;
+}
 
 export default function Layout({ children }: LayoutProps): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
@@ -18,33 +20,56 @@ export default function Layout({ children }: LayoutProps): JSX.Element {
     };
   }, [dispatch, navigate]);
 
-  const navLinks = useMemo<TruxOpsNavLink[]>(() => {
-    if (user) {
-      return [
-        { label: 'Home', to: '/' },
-        { label: 'Pricing', to: '/pricing' },
-        { label: 'About', to: '/about' },
-        { label: 'Dashboard', to: '/dashboard' },
-        { label: 'Profile', to: '/profile' },
-      ];
-    }
-
-    return [
-      { label: 'Home', to: '/' },
-      { label: 'Pricing', to: '/pricing' },
-      { label: 'About', to: '/about' },
-    ];
-  }, [user]);
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <TruxOpsNavbar
-        navLinks={navLinks}
-        textAction={
-          user ? { label: 'Logout', onClick: handleLogout } : { label: 'Login', to: '/sign-in' }
-        }
-        ctaAction={user ? undefined : { label: 'Get Started', to: '/sign-up' }}
-      />
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="text-xl font-bold text-gray-900">
+              DibHub
+            </Link>
+            <ul className="flex gap-6 items-center">
+              <li>
+                <Link to="/" className="text-gray-900 hover:text-blue-600">
+                  Home
+                </Link>
+              </li>
+              {user ? (
+                <>
+                  <li>
+                    <Link to="/dashboard" className="text-gray-900 hover:text-blue-600">
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/profile" className="text-gray-900 hover:text-blue-600">
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button onClick={handleLogout} className="text-gray-900 hover:text-blue-600">
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/sign-in" className="text-gray-900 hover:text-blue-600">
+                      Sign In
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/sign-up" className="text-gray-900 hover:text-blue-600">
+                      Sign Up
+                    </Link>
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
+        </div>
+      </nav>
       <main className="flex-1">{children}</main>
     </div>
   );

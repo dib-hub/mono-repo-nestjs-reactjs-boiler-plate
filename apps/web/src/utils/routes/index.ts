@@ -6,10 +6,6 @@ const AUTH_ROUTES: AuthRoute = {
 
 const PUBLIC_ROUTES: PublicRoute = {
   home: '/',
-  pricing: '/pricing',
-  about: '/about',
-  privacyPolicy: '/privacy-policy',
-  termsOfService: '/terms-of-service',
 };
 
 const PROTECTED_ROUTES_NAMES: ProtectedRoute = {

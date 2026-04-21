@@ -10,10 +10,6 @@ import { PROTECTED_ROUTES } from '@src/routes/routes';
 import { getCurrentUser } from '@src/services/auth';
 
 const HomePage = lazy(() => import('@src/pages/HomePage'));
-const PricingPage = lazy(() => import('@src/pages/PricingPage'));
-const AboutPage = lazy(() => import('@src/pages/AboutPage'));
-const PrivacyPolicyPage = lazy(() => import('@src/pages/PrivacyPolicyPage'));
-const TermsOfServicePage = lazy(() => import('@src/pages/TermsOfServicePage'));
 const SignIn = lazy(() => import('@src/pages/SignIn'));
 const SignUp = lazy(() => import('@src/pages/SignUp'));
 const ResetPassword = lazy(() => import('@src/pages/ResetPassword'));
@@ -40,10 +36,6 @@ function App(): JSX.Element {
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
